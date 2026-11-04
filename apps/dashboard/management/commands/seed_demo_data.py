@@ -43,13 +43,13 @@ from apps.projects.models import (
 )
 
 DEMO_USERS = [
-    # username, first, last, roles
-    ("pm.demo", "Quản lý", "Dự án (Demo)", [roles.PROJECT_MANAGER]),
-    ("member.an", "An", "Nguyễn (Demo)", [roles.PROJECT_MEMBER]),
-    ("member.binh", "Bình", "Trần (Demo)", [roles.PROJECT_MEMBER]),
-    ("sales.demo", "Sales", "Viewer (Demo)", [roles.SALES_VIEWER]),
-    ("finance.demo", "Finance", "Viewer (Demo)", [roles.FINANCE_VIEWER, roles.PROJECT_MEMBER]),
-    ("admin.demo", "Quản trị", "Hệ thống (Demo)", [roles.SYSTEM_ADMIN]),
+    # username, first (họ + tên đệm), last (tên), roles — get_full_name() ghép thành họ tên đầy đủ
+    ("ql.duan", "Lê Hoàng", "Nam", [roles.PROJECT_MANAGER]),
+    ("an.nguyen", "Nguyễn Văn", "An", [roles.PROJECT_MEMBER]),
+    ("binh.tran", "Trần Thị", "Bình", [roles.PROJECT_MEMBER]),
+    ("kinhdoanh", "Phạm Minh", "Đức", [roles.SALES_VIEWER]),
+    ("ketoan", "Võ Thu", "Hà", [roles.FINANCE_VIEWER, roles.PROJECT_MEMBER]),
+    ("quantri", "Đỗ Quang", "Huy", [roles.SYSTEM_ADMIN]),
 ]
 
 
@@ -97,7 +97,7 @@ class Command(BaseCommand):
         SalesHandover.objects.filter(is_demo_data=True).delete()
 
     def _create_demo_data(self, users):
-        pm, an, binh, finance = users["pm.demo"], users["member.an"], users["member.binh"], users["finance.demo"]
+        pm, an, binh, finance = users["ql.duan"], users["an.nguyen"], users["binh.tran"], users["ketoan"]
         today = timezone.localdate()
 
         def d(days):
@@ -105,15 +105,15 @@ class Command(BaseCommand):
 
         # --- Handovers -----------------------------------------------------
         accepted = SalesHandover.objects.create(
-            external_opportunity_id="DEMO-OPP-001",
-            customer_name="Công ty Mẫu Alpha (DEMO)",
-            deal_name="Hệ thống camera nhà xưởng (DEMO)",
-            sales_owner_name="Sales Mẫu",
+            external_opportunity_id="OPP-2026-018",
+            customer_name="Công ty TNHH Cơ khí Chính xác Tân Phú",
+            deal_name="Hệ thống camera giám sát nhà xưởng",
+            sales_owner_name="Phạm Minh Đức",
             committed_value=Decimal("1250000000"),
             committed_start_date=d(-45),
             committed_end_date=d(60),
-            committed_scope="Cung cấp và lắp đặt 120 camera, 1 trung tâm giám sát. (Dữ liệu mẫu)",
-            boq_reference="BOQ-DEMO-001",
+            committed_scope="Cung cấp và lắp đặt 120 camera IP, 01 trung tâm giám sát.",
+            boq_reference="BOQ-2026-018",
             status=HandoverStatus.ACCEPTED,
             review_note="Đủ thông tin để triển khai.",
             reviewed_by=pm,
@@ -122,22 +122,22 @@ class Command(BaseCommand):
             created_by=pm,
         )
         SalesHandover.objects.create(
-            external_opportunity_id="DEMO-OPP-002",
-            customer_name="Công ty Mẫu Beta (DEMO)",
-            deal_name="Nâng cấp mạng văn phòng (DEMO)",
-            sales_owner_name="Sales Mẫu",
+            external_opportunity_id="OPP-2026-023",
+            customer_name="Công ty CP Logistics Đông Dương",
+            deal_name="Nâng cấp hạ tầng mạng văn phòng",
+            sales_owner_name="Phạm Minh Đức",
             committed_value=Decimal("380000000"),
             committed_start_date=d(10),
             committed_end_date=d(70),
-            committed_scope="Thay thế switch lõi và Wi-Fi 3 tầng. (Dữ liệu mẫu)",
+            committed_scope="Thay thế switch lõi và hệ thống Wi-Fi cho 3 tầng.",
             status=HandoverStatus.PENDING,
             is_demo_data=True,
             created_by=pm,
         )
         SalesHandover.objects.create(
-            external_opportunity_id="DEMO-OPP-003",
-            customer_name="Công ty Mẫu Gamma (DEMO)",
-            deal_name="Phòng họp trực tuyến (DEMO)",
+            external_opportunity_id="OPP-2026-027",
+            customer_name="Công ty TNHH Dược phẩm Minh Khang",
+            deal_name="Trang bị phòng họp trực tuyến",
             committed_value=Decimal("210000000"),
             status=HandoverStatus.NEEDS_INFO,
             review_note="Thiếu BOQ chi tiết và ngày bàn giao cam kết.",
@@ -149,9 +149,9 @@ class Command(BaseCommand):
 
         # --- Projects ------------------------------------------------------
         p1 = Project.objects.create(
-            name="Hệ thống camera nhà xưởng (DEMO)",
-            customer_name="Công ty Mẫu Alpha (DEMO)",
-            description="Dự án mẫu tạo từ bàn giao DEMO-OPP-001.",
+            name="Hệ thống camera giám sát nhà xưởng",
+            customer_name="Công ty TNHH Cơ khí Chính xác Tân Phú",
+            description="Dự án lập từ hồ sơ bàn giao OPP-2026-018.",
             status=ProjectStatus.IN_PROGRESS,
             manager=pm,
             planned_start_date=d(-40),
@@ -161,8 +161,8 @@ class Command(BaseCommand):
             created_by=pm,
         )
         p2 = Project.objects.create(
-            name="Triển khai phần mềm kho (DEMO)",
-            customer_name="Công ty Mẫu Delta (DEMO)",
+            name="Triển khai phần mềm quản lý kho",
+            customer_name="Công ty CP Thực phẩm An Lạc",
             status=ProjectStatus.IN_PROGRESS,
             manager=pm,
             planned_start_date=d(-90),
@@ -171,8 +171,8 @@ class Command(BaseCommand):
             created_by=pm,
         )
         p3 = Project.objects.create(
-            name="Bảo trì hạ tầng định kỳ (DEMO)",
-            customer_name="Công ty Mẫu Epsilon (DEMO)",
+            name="Bảo trì hạ tầng CNTT định kỳ",
+            customer_name="Công ty TNHH Quản lý Bất động sản Hải Âu",
             status=ProjectStatus.READY,
             manager=pm,
             planned_start_date=d(7),
@@ -193,23 +193,23 @@ class Command(BaseCommand):
         KickoffRecord.objects.create(
             project=p1,
             meeting_date=d(-38),
-            location="Phòng họp tầng 3 (DEMO)",
-            attendees="Project, Sales, Kế toán, Kho",
-            minutes="Thống nhất phạm vi, mốc khảo sát và lịch giao hàng. (Dữ liệu mẫu)",
-            follow_up="Sales gửi bản BOQ cuối cùng.",
+            location="Phòng họp tầng 3",
+            attendees="Phòng Dự án, Phòng Kinh doanh, Phòng Kế toán, Bộ phận Kho",
+            minutes="Thống nhất phạm vi công việc, mốc khảo sát và kế hoạch giao hàng.",
+            follow_up="Phòng Kinh doanh gửi bản BOQ chốt.",
             created_by=pm,
         )
         contract_doc = ProjectDocument.objects.create(
             project=p1,
             doc_type=DocumentType.CONTRACT,
-            title="Hợp đồng mẫu Alpha (DEMO)",
-            external_reference=r"\\fileserver\demo\alpha\hop-dong.pdf",
+            title="Hợp đồng số HD-2026-018 (bản scan)",
+            external_reference=r"\\fileserver\du-an\HD-2026-018\hop-dong.pdf",
             created_by=pm,
         )
         ProjectContract.objects.create(
             project=p1,
-            contract_number="HD-DEMO-001",
-            title="Hợp đồng cung cấp và lắp đặt camera (DEMO)",
+            contract_number="HD-2026-018",
+            title="Hợp đồng cung cấp và lắp đặt hệ thống camera giám sát",
             status=ContractStatus.SIGNED,
             signed_date=d(-35),
             contract_value=Decimal("1250000000"),
@@ -219,16 +219,16 @@ class Command(BaseCommand):
 
         # --- Plan ----------------------------------------------------------
         m1 = ProjectMilestone.objects.create(
-            project=p1, name="Khảo sát xong", due_date=d(-20), status=MilestoneStatus.DONE, completed_date=d(-22), sort_order=1
+            project=p1, name="Hoàn thành khảo sát", due_date=d(-20), status=MilestoneStatus.DONE, completed_date=d(-22), sort_order=1
         )
         m2 = ProjectMilestone.objects.create(
             project=p1, name="Giao hàng thiết bị", due_date=d(7), status=MilestoneStatus.IN_PROGRESS, sort_order=2
         )
         ProjectMilestone.objects.create(project=p1, name="Nghiệm thu", due_date=d(50), sort_order=3)
         m4 = ProjectMilestone.objects.create(
-            project=p2, name="Go-live", due_date=d(-5), status=MilestoneStatus.IN_PROGRESS, sort_order=1
+            project=p2, name="Vận hành chính thức", due_date=d(-5), status=MilestoneStatus.IN_PROGRESS, sort_order=1
         )
-        ProjectMilestone.objects.create(project=p3, name="Kickoff", due_date=d(10), sort_order=1)
+        ProjectMilestone.objects.create(project=p3, name="Họp khởi động", due_date=d(10), sort_order=1)
 
         def task(project, title, assignee, due, status=TaskStatus.TODO, milestone=None, priority=Priority.MEDIUM):
             return ProjectTask.objects.create(
@@ -251,21 +251,52 @@ class Command(BaseCommand):
         t5 = task(p2, "Đào tạo người dùng kho", binh, d(-8), TaskStatus.BLOCKED, m4, Priority.HIGH)
         task(p2, "Chuyển dữ liệu tồn kho", binh, d(-3), TaskStatus.IN_PROGRESS, m4)
         task(p3, "Lập lịch bảo trì quý", an, d(12))
+        task(p1, "Đối chiếu hoá đơn đầu vào", finance, d(5))
+        task(p2, "Bàn giao tài liệu vận hành", an, d(4))
+        task(p3, "Khảo sát hiện trạng thiết bị", None, d(9))
+
+        # Completed work spread over the past weeks, so the 8-week trend has history.
+        # created_at / completed_at are set after insert (created_at is auto_now_add).
+        def backdate(t, created_days_ago, done_days_ago=None):
+            now = timezone.now()
+            fields = {"created_at": now - timedelta(days=created_days_ago)}
+            if done_days_ago is not None:
+                fields["completed_at"] = now - timedelta(days=done_days_ago)
+            ProjectTask.objects.filter(pk=t.pk).update(**fields)
+
+        backdate(t1, 50, 22)
+        for project, title, who, created_ago, done_ago in [
+            (p1, "Thu thập yêu cầu kỹ thuật", an, 54, 46),
+            (p1, "Chốt danh mục thiết bị", binh, 48, 38),
+            (p1, "Họp khởi động với khách hàng", an, 41, 38),
+            (p2, "Cài đặt máy chủ ứng dụng", binh, 56, 49),
+            (p2, "Cấu hình danh mục hàng hoá", binh, 47, 33),
+            (p2, "Kiểm thử nghiệp vụ nhập kho", binh, 35, 25),
+            (p2, "Kiểm thử nghiệp vụ xuất kho", an, 30, 17),
+            (p1, "Thiết kế sơ đồ vị trí camera", an, 27, 12),
+            (p1, "Thống nhất bản vẽ với khách hàng", an, 19, 9),
+            (p2, "Hướng dẫn sử dụng cho thủ kho", binh, 12, 4),
+            (p1, "Kiểm tra hàng mẫu", binh, 8, 2),
+        ]:
+            backdate(task(project, title, who, d(-done_ago), TaskStatus.DONE), created_ago, done_ago)
+        open_seeded = ProjectTask.objects.filter(project__in=(p1, p2, p3)).exclude(status=TaskStatus.DONE).order_by("pk")
+        for t, created_ago in zip(open_seeded, (44, 36, 30, 26, 20, 15, 10, 6, 3, 1)):
+            backdate(t, created_ago)
 
         # --- Progress history ---------------------------------------------
         ProgressUpdate.objects.create(
             project=p1, task=t1, author=an, percent=100, note="Đã khảo sát xong.",
             status_from=TaskStatus.IN_PROGRESS, status_to=TaskStatus.DONE,
         )
-        ProgressUpdate.objects.create(project=p1, task=t2, author=binh, percent=40, note="Đã nhận báo giá 2 NCC.")
-        ProgressUpdate.objects.create(project=p1, author=pm, percent=35, note="Tiến độ chung do PM đánh giá. (Dữ liệu mẫu)")
+        ProgressUpdate.objects.create(project=p1, task=t2, author=binh, percent=40, note="Đã nhận báo giá từ 2 nhà cung cấp.")
+        ProgressUpdate.objects.create(project=p1, author=pm, percent=35, note="Đánh giá tiến độ chung của Quản lý dự án.")
         stale = ProgressUpdate.objects.create(project=p2, task=t5, author=binh, note="Chờ khách hàng xếp lịch đào tạo.")
         ProgressUpdate.objects.filter(pk=stale.pk).update(created_at=timezone.now() - timedelta(days=10))
-        ProgressUpdate.objects.create(project=p2, author=pm, percent=70, note="Tiến độ chung do PM đánh giá. (Dữ liệu mẫu)")
+        ProgressUpdate.objects.create(project=p2, author=pm, percent=70, note="Đánh giá tiến độ chung của Quản lý dự án.")
 
         # --- Issues --------------------------------------------------------
         ProjectIssue.objects.create(
-            project=p1, task=t2, kind=IssueKind.RISK, title="NCC có thể giao trễ 1 tuần",
+            project=p1, task=t2, kind=IssueKind.RISK, title="Nhà cung cấp có thể giao hàng trễ 1 tuần",
             severity=Severity.MEDIUM, assignee=binh, reported_by=binh, created_by=binh,
         )
         ProjectIssue.objects.create(
@@ -276,26 +307,26 @@ class Command(BaseCommand):
         # --- Purchase / payment tracking ----------------------------------
         pr = PurchaseRequest.objects.create(
             project=p1, title="Mua camera và đầu ghi", requester=binh, request_date=d(-10),
-            supplier_name="Nhà cung cấp Mẫu A (DEMO)", is_demo_data=True, created_by=binh,
+            supplier_name="Công ty TNHH Thiết bị An ninh Việt Phát", is_demo_data=True, created_by=binh,
         )
         PurchaseItem.objects.create(purchase_request=pr, description="Camera IP 4MP", quantity=120, unit="cái", unit_cost=Decimal("2500000"))
         PurchaseItem.objects.create(purchase_request=pr, description="Đầu ghi 64 kênh", quantity=2, unit="bộ", unit_cost=Decimal("45000000"))
         PurchaseStatusEntry.objects.create(
-            purchase_request=pr, status_label="Đã gửi PM xem xét", status_source=StatusSource.DEMO,
-            evidence_note="Dữ liệu mẫu – không phải trạng thái MISA.", recorded_by=binh,
+            purchase_request=pr, status_label="Đã trình Quản lý dự án", status_source=StatusSource.DEMO,
+            evidence_note="Ghi nhận nội bộ, chưa đối chiếu với MISA.", recorded_by=binh,
         )
         pr2 = PurchaseRequest.objects.create(
             project=p2, title="Mua máy quét mã vạch", requester=binh, request_date=d(-20),
-            supplier_name="Nhà cung cấp Mẫu B (DEMO)", is_demo_data=True, created_by=binh,
+            supplier_name="Công ty CP Thiết bị Mã vạch Kim Long", is_demo_data=True, created_by=binh,
         )
         PurchaseItem.objects.create(purchase_request=pr2, description="Máy quét mã vạch", quantity=10, unit="cái", unit_cost=Decimal("3200000"))
 
         pay = PaymentRequest.objects.create(
-            project=p1, payee_name="Nhà cung cấp Mẫu A (DEMO)", amount=Decimal("150000000"),
-            reason="Tạm ứng 50% đơn hàng camera (Dữ liệu mẫu)", purchase_request=pr, requester=pm,
+            project=p1, payee_name="Công ty TNHH Thiết bị An ninh Việt Phát", amount=Decimal("150000000"),
+            reason="Tạm ứng 50% giá trị đơn hàng camera", purchase_request=pr, requester=pm,
             request_date=d(-5), is_demo_data=True, created_by=pm,
         )
         PaymentStatusEntry.objects.create(
-            payment_request=pay, status_label="Project Director đã xem", status_source=StatusSource.DEMO,
-            evidence_note="Dữ liệu mẫu – không phải trạng thái MISA.", recorded_by=pm,
+            payment_request=pay, status_label="Giám đốc dự án đã xem xét", status_source=StatusSource.DEMO,
+            evidence_note="Ghi nhận nội bộ, chưa đối chiếu với MISA.", recorded_by=pm,
         )

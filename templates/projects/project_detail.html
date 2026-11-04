@@ -11,9 +11,7 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
   <div>
-    <h1 class="h4 mb-1">{{ project.name }}
-      {% if project.is_demo_data %}<span class="badge text-bg-warning align-middle">Dữ liệu mẫu</span>{% endif %}
-    </h1>
+    <h1 class="h4 mb-1">{{ project.name }}</h1>
     <div class="text-muted small">{{ project.code }} · {{ project.customer_name }} · Quản lý: {{ project.manager }}</div>
   </div>
   <div class="d-flex gap-2 align-items-center">
@@ -28,7 +26,7 @@
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#plan" type="button" role="tab">Kế hoạch ({{ tasks|length }})</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#progress" type="button" role="tab">Tiến độ</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#issues" type="button" role="tab">Vấn đề / rủi ro ({{ issues|length }})</button></li>
-  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#records" type="button" role="tab">Kickoff · Hợp đồng · Tài liệu</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#records" type="button" role="tab">Hồ sơ dự án</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#purchases" type="button" role="tab">Mua hàng ({{ purchase_requests|length }})</button></li>
   <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#payments" type="button" role="tab">Thanh toán ({{ payment_requests|length }})</button></li>
 </ul>
@@ -40,25 +38,25 @@
     <div class="row g-3">
       <div class="col-12 col-lg-6">
         <div class="card shadow-sm h-100"><div class="card-body">
-          <h2 class="h6 text-muted">Kế hoạch thực hiện (Project)</h2>
+          <h2 class="h6 text-muted">Kế hoạch thực hiện</h2>
           <dl class="row mb-0 small">
-            <dt class="col-5">Bắt đầu (KH)</dt><dd class="col-7">{{ project.planned_start_date|date:"d/m/Y"|default:"—" }}</dd>
-            <dt class="col-5">Kết thúc (KH)</dt><dd class="col-7">{{ project.planned_end_date|date:"d/m/Y"|default:"—" }}{% if project.is_overdue %} <span class="badge text-bg-danger">Quá hạn</span>{% endif %}</dd>
-            <dt class="col-5">% tiến độ báo cáo</dt>
+            <dt class="col-5">Ngày bắt đầu</dt><dd class="col-7">{{ project.planned_start_date|date:"d/m/Y"|default:"—" }}</dd>
+            <dt class="col-5">Ngày kết thúc</dt><dd class="col-7">{{ project.planned_end_date|date:"d/m/Y"|default:"—" }}{% if project.is_overdue %} <span class="badge text-bg-danger">Quá hạn</span>{% endif %}</dd>
+            <dt class="col-5">Tiến độ báo cáo</dt>
             <dd class="col-7">{% if project.latest_percent is not None %}{{ project.latest_percent }}%{% else %}Chưa có{% endif %}
-              <div class="form-text">Số % gần nhất do người dùng báo cáo. Chưa áp dụng công thức tính tiến độ.</div></dd>
+              <div class="form-text">Tỷ lệ % theo báo cáo gần nhất.</div></dd>
             <dt class="col-5">Mô tả</dt><dd class="col-7">{{ project.description|linebreaksbr|default:"—" }}</dd>
           </dl>
         </div></div>
       </div>
       <div class="col-12 col-lg-6">
         <div class="card shadow-sm h-100"><div class="card-body">
-          <h2 class="h6 text-muted">Cam kết từ Sales (bàn giao)</h2>
+          <h2 class="h6 text-muted">Cam kết từ Phòng Kinh doanh</h2>
           {% if project.handover %}
             {% with h=project.handover %}
             <dl class="row mb-0 small">
               <dt class="col-5">Thương vụ</dt><dd class="col-7">{% if can_view_handovers %}<a href="{{ h.get_absolute_url }}">{{ h.deal_name }}</a>{% else %}{{ h.deal_name }}{% endif %}</dd>
-              <dt class="col-5">Mã Opportunity</dt><dd class="col-7">{{ h.external_opportunity_id|default:"—" }} <span class="text-muted">({{ h.get_source_system_display }})</span></dd>
+              <dt class="col-5">Mã cơ hội</dt><dd class="col-7">{{ h.external_opportunity_id|default:"—" }} <span class="text-muted">({{ h.get_source_system_display }})</span></dd>
               <dt class="col-5">Thời gian cam kết</dt><dd class="col-7">{{ h.committed_start_date|date:"d/m/Y"|default:"?" }} → {{ h.committed_end_date|date:"d/m/Y"|default:"?" }}</dd>
               {% if can_view_finance %}<dt class="col-5">Giá trị bán</dt><dd class="col-7">{{ h.committed_value|money:h.currency }}</dd>{% endif %}
               <dt class="col-5">Phạm vi</dt><dd class="col-7">{{ h.committed_scope|linebreaksbr|default:"—" }}</dd>
@@ -148,8 +146,8 @@
   {# ------------------------------------------------------------ Progress #}
   <div class="tab-pane fade" id="progress" role="tabpanel">
     <div class="d-flex justify-content-between align-items-center mb-2">
-      <h2 class="h6 mb-0">Lịch sử cập nhật tiến độ <span class="text-muted fw-normal small">(30 mục gần nhất, không sửa/xoá được)</span></h2>
-      <a class="btn btn-sm btn-primary" href="{% url 'projects:progress_create' project.pk %}">Gửi cập nhật</a>
+      <h2 class="h6 mb-0">Lịch sử cập nhật tiến độ <span class="text-muted fw-normal small">(30 bản ghi gần nhất · không thể sửa hoặc xoá)</span></h2>
+      <a class="btn btn-sm btn-primary" href="{% url 'projects:progress_create' project.pk %}">Báo cáo tiến độ</a>
     </div>
     <div class="list-group shadow-sm">
       {% for u in progress_updates %}
@@ -194,7 +192,7 @@
   {# ------------------------------------------------------------- Records #}
   <div class="tab-pane fade" id="records" role="tabpanel">
     <div class="d-flex justify-content-between align-items-center mb-2">
-      <h2 class="h6 mb-0">Kickoff</h2>
+      <h2 class="h6 mb-0">Họp khởi động (kickoff)</h2>
       {% if can_manage %}<a class="btn btn-sm btn-primary" href="{% url 'projects:kickoff_create' project.pk %}">Thêm biên bản</a>{% endif %}
     </div>
     {% for k in kickoffs %}
@@ -206,7 +204,7 @@
         {% if k.follow_up %}<div class="mt-1"><em>Theo dõi:</em> {{ k.follow_up|linebreaksbr }}</div>{% endif %}
       </div></div>
     {% empty %}
-      <p class="text-muted small">Chưa có biên bản kickoff.</p>
+      <p class="text-muted small">Chưa có biên bản họp khởi động.</p>
     {% endfor %}
 
     <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
@@ -230,7 +228,7 @@
     </div></div>
 
     <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
-      <h2 class="h6 mb-0">Tài liệu <span class="text-muted fw-normal small">(chỉ lưu thông tin và vị trí file, không tải file lên)</span></h2>
+      <h2 class="h6 mb-0">Tài liệu <span class="text-muted fw-normal small">(lưu thông tin và vị trí lưu trữ file gốc)</span></h2>
       {% if can_manage %}<a class="btn btn-sm btn-primary" href="{% url 'projects:document_create' project.pk %}">Thêm tài liệu</a>{% endif %}
     </div>
     <div class="card shadow-sm"><div class="table-responsive">
@@ -250,7 +248,7 @@
 
   {# ----------------------------------------------------------- Purchases #}
   <div class="tab-pane fade" id="purchases" role="tabpanel">
-    <div class="alert alert-secondary small py-2">Chỉ theo dõi. Phê duyệt chính thức thực hiện trên MISA; trạng thái ở đây do người dùng ghi nhận, kèm nguồn.</div>
+    <div class="alert alert-secondary small py-2">Mục này dùng để theo dõi tiến trình đề nghị mua hàng. Phê duyệt chính thức được thực hiện trên MISA; trạng thái tại đây do người phụ trách ghi nhận kèm nguồn đối chiếu.</div>
     {% if can_manage %}<a class="btn btn-sm btn-primary mb-2" href="{% url 'procurement:create' project.pk %}">Tạo đề nghị mua hàng</a>{% endif %}
     <div class="card shadow-sm"><div class="table-responsive">
       <table class="table mb-0">
@@ -273,7 +271,7 @@
 
   {# ------------------------------------------------------------ Payments #}
   <div class="tab-pane fade" id="payments" role="tabpanel">
-    <div class="alert alert-secondary small py-2">Chỉ theo dõi. Hệ thống không thực hiện thanh toán và không thay thế phê duyệt trên MISA.</div>
+    <div class="alert alert-secondary small py-2">Mục này dùng để theo dõi tiến trình đề nghị thanh toán. Việc phê duyệt và chi trả được thực hiện trên MISA.</div>
     {% if can_manage %}<a class="btn btn-sm btn-primary mb-2" href="{% url 'payments:create' project.pk %}">Tạo đề nghị thanh toán</a>{% endif %}
     <div class="card shadow-sm"><div class="table-responsive">
       <table class="table mb-0">

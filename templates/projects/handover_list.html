@@ -6,7 +6,7 @@
   <h1 class="h4 mb-0">Bàn giao từ Sales</h1>
   {% if is_pm %}<a class="btn btn-primary" href="{% url 'projects:handover_create' %}">Nhập hồ sơ bàn giao</a>{% endif %}
 </div>
-<p class="text-muted small">Giai đoạn 1: hồ sơ được nhập tay. Đồng bộ từ OplaCRM sẽ làm ở Phase 2, sau khi được cấp quyền API.</p>
+<p class="text-muted small">Hồ sơ bàn giao được lập tự động khi cơ hội trên OplaCRM chuyển sang “Thắng”, hoặc do Quản lý dự án nhập trực tiếp.</p>
 
 <form class="row g-2 mb-3" method="get">
   <div class="col-8 col-md-4">
@@ -23,11 +23,11 @@
 
 <div class="card shadow-sm"><div class="table-responsive">
   <table class="table table-hover mb-0">
-    <thead class="table-light"><tr><th>Thương vụ</th><th>Khách hàng</th><th>Mã Opportunity</th>{% if can_view_finance %}<th>Giá trị bán</th>{% endif %}<th>Trạng thái</th><th>Dự án</th></tr></thead>
+    <thead class="table-light"><tr><th>Thương vụ</th><th>Khách hàng</th><th>Mã cơ hội</th>{% if can_view_finance %}<th>Giá trị bán</th>{% endif %}<th>Trạng thái</th><th>Dự án</th></tr></thead>
     <tbody>
     {% for h in handovers %}
       <tr>
-        <td><a href="{{ h.get_absolute_url }}">{{ h.deal_name }}</a>{% if h.is_demo_data %} <span class="badge text-bg-warning">Mẫu</span>{% endif %}</td>
+        <td><a href="{{ h.get_absolute_url }}">{{ h.deal_name }}</a></td>
         <td>{{ h.customer_name }}</td>
         <td class="code">{{ h.external_opportunity_id|default:"—" }}</td>
         {% if can_view_finance %}<td>{{ h.committed_value|money:h.currency }}</td>{% endif %}

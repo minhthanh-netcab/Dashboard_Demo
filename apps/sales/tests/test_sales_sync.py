@@ -124,7 +124,7 @@ class SalesViewsTests(TestCase):
         self.client.login(username=sales.username, password=TEST_PASSWORD)
         response = self.client.get(url, {"won": "1"})
         self.assertEqual(len(response.context["opportunities"]), 2)
-        self.assertContains(response, "MÔ PHỎNG")
+        self.assertContains(response, "Hệ thống báo cháy tự động kho A")
         self.assertNotContains(response, "860.000.000")  # amount hidden without finance role
 
 

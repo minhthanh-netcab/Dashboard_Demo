@@ -53,7 +53,7 @@ class RunSyncJobView(LoginRequiredMixin, UserPassesTestMixin, View):
             messages.add_message(
                 request,
                 MESSAGE_LEVELS.get(run.status, messages.INFO),
-                f"{run.get_system_display()} / {run.entity}: {run.get_status_display()} — "
-                f"đọc {run.fetched}, tạo {run.created}, cập nhật {run.updated}, lỗi {run.failed}. {run.message}",
+                f"{run.get_system_display()} / {run.entity_label}: {run.get_status_display()} — "
+                f"đọc {run.fetched}, thêm mới {run.created}, cập nhật {run.updated}, lỗi {run.failed}. {run.message}",
             )
         return redirect("integrations:status")

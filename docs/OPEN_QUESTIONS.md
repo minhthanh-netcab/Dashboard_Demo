@@ -18,7 +18,7 @@ Cập nhật file này khi một mục được trả lời. Mục **Giả đị
 | A10 | Tài liệu chỉ lưu metadata và vị trí file, không upload | `ProjectDocument` | Phòng Dự án / IT |
 | A11 | Mã dự án dạng `PRJ-YYYY-NNN`; đề nghị dạng `PR-…` và `PAY-…` khi để trống | `core/utils.next_sequential_code` | Phòng Dự án / Kế toán |
 | A12 | Trạng thái mua hàng/thanh toán là nhãn tự do + nguồn; không mã hoá chuỗi phê duyệt | `core.StatusEntryBase` | Dự án + Kế toán |
-| A13 | "Dự án cần chú ý" = quá hạn kế hoạch hoặc có task quá hạn hoặc có vấn đề Cao/Nghiêm trọng đang mở; mốc "sắp đến hạn" = 14 ngày; task "cần cập nhật" = đang làm và không có cập nhật trong 7 ngày | `dashboard/views.py` | Trưởng phòng Dự án |
+| A13 | Sức khoẻ dự án (RAG): **Nguy cơ cao** = quá ngày kết thúc kế hoạch, có vấn đề Nghiêm trọng đang mở, hoặc ≥ 3 task quá hạn; **Cần theo dõi** = có task quá hạn, mốc trễ hạn, task vướng mắc hoặc vấn đề Cao đang mở; còn lại **Ổn định**. Đề nghị mua hàng/thanh toán "chờ cập nhật" = không có trạng thái mới trong 7 ngày; mốc "sắp đến hạn" = 14 ngày; task "cần cập nhật" = đang làm và không có cập nhật trong 7 ngày | `dashboard/overview.py` | Trưởng phòng Dự án |
 | A14 | Giao diện tiếng Việt; tiền tệ mặc định VND | templates, models | Nhóm phát triển |
 | A15 | Thành viên chỉ chọn được task của mình khi gửi cập nhật tiến độ; chỉ người báo cáo, người xử lý hoặc PM sửa được vấn đề | `ProgressUpdateForm`, `permissions.can_edit_issue` | Phòng Dự án |
 | A16 | Opportunity thắng → tự tạo bàn giao "Chờ tiếp nhận"; quan hệ 1 Opportunity ↔ 1 bàn giao | `sales/services._ensure_pending_handover` | Sales + Dự án |

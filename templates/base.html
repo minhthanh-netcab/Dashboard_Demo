@@ -19,28 +19,68 @@
 <body>
 {% block shell %}
 {% if user.is_authenticated %}
-<nav class="navbar navbar-expand-xl topnav" aria-label="Menu chính">
-  <div class="topnav-inner">
-    <a class="topnav-brand" href="{% url 'dashboard:home' %}">
-      <img src="{% static 'img/netcab-logo.png' %}" alt="NETCAB">
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Mở menu">
-      <i class="bi bi-list" aria-hidden="true"></i>
-    </button>
+{# App shell modelled on Power Apps model-driven apps: brand app bar + left site map. #}
+<header class="appbar">
+  <button class="appbar-btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sideNav" aria-controls="sideNav" aria-label="Mở menu">
+    <i class="bi bi-list" aria-hidden="true"></i>
+  </button>
+  <a class="appbar-brand" href="{% url 'dashboard:home' %}">
+    <img src="{% static 'img/netcab-logo-white.png' %}" alt="NETCAB">
+    <span class="appbar-title">Quản lý dự án</span>
+  </a>
 
-    <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav topnav-links">
+  <div class="dropdown ms-auto">
+    <button class="appbar-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <span class="appbar-user-name">{{ user }}</span>
+      <span class="avatar" aria-hidden="true">{{ user.get_short_name|default:user.username|first|upper }}</span>
+    </button>
+    <div class="dropdown-menu dropdown-menu-end">
+      <div class="dropdown-header">
+        <div class="fw-semibold text-body">{{ user }}</div>
+        <div class="small">{{ role_display }}</div>
+      </div>
+      <div class="dropdown-divider"></div>
+      {% if user.is_staff %}
+        <a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-sliders" aria-hidden="true"></i> Trang quản trị</a>
+      {% endif %}
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button class="dropdown-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Đăng xuất</button>
+      </form>
+    </div>
+  </div>
+</header>
+{% endif %}
+
+<div class="app-shell">
+  {% if user.is_authenticated %}
+  <aside class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sideNav" aria-label="Menu chính">
+    <div class="offcanvas-header d-lg-none">
+      <span class="fw-semibold">Menu</span>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sideNav" aria-label="Đóng menu"></button>
+    </div>
+    <nav class="sidebar-nav">
+      <ul class="nav flex-column">
         {% if is_pm %}
           {% include "core/_nav_link.html" with section="pm_dashboard" url_name="dashboard:pm" icon="grid-1x2" label="Tổng quan" %}
         {% endif %}
         {% include "core/_nav_link.html" with section="my_work" url_name="dashboard:my_work" icon="check2-square" label="Việc của tôi" %}
         {% include "core/_nav_link.html" with section="projects" url_name="projects:list" icon="kanban" label="Dự án" %}
+      </ul>
+      {% if can_view_handovers or can_view_sales_data %}
+      <div class="sidebar-group">Kinh doanh</div>
+      <ul class="nav flex-column">
         {% if can_view_handovers %}
           {% include "core/_nav_link.html" with section="handovers" url_name="projects:handover_list" icon="box-arrow-in-right" label="Bàn giao" %}
         {% endif %}
         {% if can_view_sales_data %}
           {% include "core/_nav_link.html" with section="opportunities" url_name="sales:opportunity_list" icon="briefcase" label="Cơ hội" %}
         {% endif %}
+      </ul>
+      {% endif %}
+      {% if can_view_finance or can_view_integrations %}
+      <div class="sidebar-group">Hệ thống</div>
+      <ul class="nav flex-column">
         {% if can_view_finance %}
           {% include "core/_nav_link.html" with section="finance" url_name="finance:overview" icon="cash-stack" label="Tài chính" %}
         {% endif %}
@@ -48,48 +88,21 @@
           {% include "core/_nav_link.html" with section="integrations" url_name="integrations:status" icon="arrow-repeat" label="Đồng bộ" %}
         {% endif %}
       </ul>
+      {% endif %}
+    </nav>
+  </aside>
+  {% endif %}
 
-      <div class="dropdown topnav-user">
-        <button class="btn topnav-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <span class="avatar" aria-hidden="true">{{ user.get_short_name|default:user.username|first|upper }}</span>
-          <span class="topnav-user-name">{{ user }}</span>
-        </button>
-        <div class="dropdown-menu dropdown-menu-end">
-          <div class="dropdown-header">
-            <div class="fw-semibold text-body">{{ user }}</div>
-            <div class="small">{{ role_display }}</div>
-          </div>
-          <div class="dropdown-divider"></div>
-          {% if user.is_staff %}
-            <a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-sliders" aria-hidden="true"></i> Trang quản trị</a>
-          {% endif %}
-          <form method="post" action="{% url 'accounts:logout' %}">
-            {% csrf_token %}
-            <button class="dropdown-item" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Đăng xuất</button>
-          </form>
-        </div>
+  <main class="app-content">
+    {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
       </div>
-    </div>
-  </div>
-</nav>
-{% endif %}
-
-{% if DEMO_MODE %}
-<div class="demo-strip" role="note">
-  <i class="bi bi-info-circle" aria-hidden="true"></i>
-  <span><strong>Môi trường demo.</strong> Dữ liệu mẫu và mô phỏng, chưa kết nối OplaCRM/MISA, không phải số liệu chính thức.</span>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
 </div>
-{% endif %}
-
-<main class="app-content">
-  {% for message in messages %}
-    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
-    </div>
-  {% endfor %}
-  {% block content %}{% endblock %}
-</main>
 {% endblock %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,28 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Đồng bộ hệ thống ngoài{% endblock %}
+{% block title %}Đồng bộ dữ liệu{% endblock %}
 {% block content %}
-<h1 class="h4 mb-3">Đồng bộ hệ thống ngoài</h1>
+<h1 class="h4 mb-3">Đồng bộ dữ liệu OplaCRM · MISA</h1>
 
 <div class="alert alert-secondary small">
-  Tất cả tích hợp đều <strong>chỉ đọc</strong>. Chế độ <code>mock</code> dùng dữ liệu mô phỏng, không kết nối mạng.
-  Chế độ <code>live</code> chưa dùng được cho tới khi công ty và nhà cung cấp cấp quyền và xác nhận schema
-  (xem docs/OPEN_QUESTIONS.md).
+  Kết nối với OplaCRM và MISA chỉ <strong>đọc dữ liệu một chiều</strong>: hệ thống lấy dữ liệu về để hiển thị,
+  không ghi hay sửa dữ liệu trên các hệ thống nguồn. Mỗi lượt đồng bộ đều được lưu lại để đối soát.
 </div>
 
 <div class="row g-3 mb-3">
   {% for job in jobs %}
   <div class="col-12 col-md-6">
     <div class="card shadow-sm h-100"><div class="card-body d-flex justify-content-between align-items-center gap-2">
-      <div>
-        <div class="fw-semibold">{{ job.label }}</div>
-        <div class="small text-muted">Chế độ:
-          {% if job.system == "OPLACRM" %}<code>{{ modes.OplaCRM }}</code>{% else %}<code>{{ modes.MISA }}</code>{% endif %}
-        </div>
-      </div>
+      <div class="fw-semibold">{{ job.label }}</div>
       {% if can_manage_integrations %}
       <form method="post" action="{% url 'integrations:run' job.key %}">
         {% csrf_token %}
-        <button class="btn btn-sm btn-primary" type="submit">Chạy đồng bộ</button>
+        <button class="btn btn-sm btn-primary" type="submit">Đồng bộ ngay</button>
       </form>
       {% endif %}
     </div></div>
@@ -31,32 +25,31 @@
 </div>
 
 <div class="card shadow-sm mb-3"><div class="card-body">
-  <h2 class="h6">Trạng thái theo loại dữ liệu</h2>
+  <h2 class="h6">Tình trạng theo loại dữ liệu</h2>
   <div class="table-responsive"><table class="table table-sm mb-0">
-    <thead><tr><th>Hệ thống</th><th>Loại dữ liệu</th><th>Thành công gần nhất</th><th>Lượt gần nhất</th><th>Con trỏ</th></tr></thead>
+    <thead><tr><th>Hệ thống</th><th>Loại dữ liệu</th><th>Đồng bộ thành công gần nhất</th><th>Kết quả lượt gần nhất</th><th>Mốc đồng bộ tăng dần</th></tr></thead>
     <tbody>
     {% for s in states %}
-      <tr><td>{{ s.get_system_display }}</td><td>{{ s.entity }}</td>
+      <tr><td>{{ s.get_system_display }}</td><td>{{ s.entity_label }}</td>
         <td>{{ s.last_success_at|date:"d/m/Y H:i"|default:"—" }}</td>
-        <td>{% if s.last_run %}{{ s.last_run.get_status_display }}{% if s.last_run.is_simulated %} <span class="badge text-bg-warning">Mô phỏng</span>{% endif %}{% else %}—{% endif %}</td>
+        <td>{% if s.last_run %}{{ s.last_run.get_status_display }}{% else %}—{% endif %}</td>
         <td class="small text-muted text-break">{{ s.cursor|default:"—" }}</td></tr>
     {% empty %}
-      <tr><td colspan="5" class="text-muted text-center py-3">Chưa chạy đồng bộ lần nào.</td></tr>
+      <tr><td colspan="5" class="text-muted text-center py-3">Chưa thực hiện lượt đồng bộ nào.</td></tr>
     {% endfor %}
     </tbody>
   </table></div>
 </div></div>
 
 <div class="card shadow-sm"><div class="card-body">
-  <h2 class="h6">Lịch sử chạy (30 lượt gần nhất)</h2>
+  <h2 class="h6">Nhật ký đồng bộ (30 lượt gần nhất)</h2>
   <div class="table-responsive"><table class="table table-sm mb-0">
-    <thead><tr><th>Bắt đầu</th><th>Hệ thống / dữ liệu</th><th>Chế độ</th><th>Kết quả</th><th class="text-end">Đọc</th><th class="text-end">Tạo</th><th class="text-end">Cập nhật</th><th class="text-end">Không đổi</th><th class="text-end">Lỗi</th><th>Ghi chú</th></tr></thead>
+    <thead><tr><th>Bắt đầu</th><th>Hệ thống / loại dữ liệu</th><th>Kết quả</th><th class="text-end">Đọc</th><th class="text-end">Thêm mới</th><th class="text-end">Cập nhật</th><th class="text-end">Không đổi</th><th class="text-end">Lỗi</th><th>Ghi chú</th></tr></thead>
     <tbody>
     {% for r in runs %}
       <tr>
         <td class="text-nowrap">{{ r.started_at|date:"d/m/Y H:i" }}</td>
-        <td>{{ r.get_system_display }} / {{ r.entity }}</td>
-        <td>{% if r.is_simulated %}<span class="badge text-bg-warning">Mô phỏng</span>{% else %}{{ r.get_mode_display }}{% endif %}</td>
+        <td>{{ r.get_system_display }} / {{ r.entity_label }}</td>
         <td>{{ r.get_status_display }}</td>
         <td class="text-end">{{ r.fetched }}</td><td class="text-end">{{ r.created }}</td><td class="text-end">{{ r.updated }}</td>
         <td class="text-end">{{ r.unchanged }}</td><td class="text-end">{{ r.failed }}</td>
@@ -67,7 +60,7 @@
         </td>
       </tr>
     {% empty %}
-      <tr><td colspan="10" class="text-muted text-center py-3">Chưa có lượt đồng bộ nào.</td></tr>
+      <tr><td colspan="9" class="text-muted text-center py-3">Chưa có lượt đồng bộ nào.</td></tr>
     {% endfor %}
     </tbody>
   </table></div>

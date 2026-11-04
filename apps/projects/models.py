@@ -32,7 +32,7 @@ class HandoverStatus(models.TextChoices):
     PENDING = "PENDING", "Chờ tiếp nhận"
     NEEDS_INFO = "NEEDS_INFO", "Cần bổ sung thông tin"
     ACCEPTED = "ACCEPTED", "Đã chấp nhận"
-    REJECTED = "REJECTED", "Từ chối"
+    REJECTED = "REJECTED", "Đã từ chối"
 
 
 class SalesHandover(TrackedModel):
@@ -46,11 +46,11 @@ class SalesHandover(TrackedModel):
     source_system = models.CharField(
         "Nguồn dữ liệu", max_length=20, choices=SourceSystem.choices, default=SourceSystem.MANUAL
     )
-    external_opportunity_id = models.CharField("Mã Opportunity (nguồn)", max_length=100, blank=True)
-    external_account_id = models.CharField("Mã Account (nguồn)", max_length=100, blank=True)
+    external_opportunity_id = models.CharField("Mã cơ hội (OplaCRM)", max_length=100, blank=True)
+    external_account_id = models.CharField("Mã khách hàng (OplaCRM)", max_length=100, blank=True)
     customer_name = models.CharField("Khách hàng", max_length=255)
     deal_name = models.CharField("Tên thương vụ", max_length=255)
-    sales_owner_name = models.CharField("Phụ trách Sales", max_length=255, blank=True)
+    sales_owner_name = models.CharField("Nhân viên kinh doanh", max_length=255, blank=True)
     committed_value = models.DecimalField(
         "Giá trị bán (cam kết)", max_digits=18, decimal_places=2, null=True, blank=True
     )
@@ -118,7 +118,7 @@ class ProjectStatus(models.TextChoices):
     IN_PROGRESS = "IN_PROGRESS", "Đang thực hiện"
     ON_HOLD = "ON_HOLD", "Tạm dừng"
     COMPLETED = "COMPLETED", "Hoàn thành"
-    CANCELLED = "CANCELLED", "Huỷ"
+    CANCELLED = "CANCELLED", "Đã huỷ"
 
 
 CLOSED_PROJECT_STATUSES = (ProjectStatus.COMPLETED, ProjectStatus.CANCELLED)
@@ -255,7 +255,7 @@ class ContractStatus(models.TextChoices):
     DRAFT = "DRAFT", "Đang soạn"
     IN_REVIEW = "IN_REVIEW", "Đang xem xét"
     SIGNED = "SIGNED", "Đã ký"
-    CANCELLED = "CANCELLED", "Huỷ"
+    CANCELLED = "CANCELLED", "Đã huỷ"
 
 
 class ProjectContract(TrackedModel):
@@ -293,10 +293,10 @@ class ProjectContract(TrackedModel):
 
 
 class MilestoneStatus(models.TextChoices):
-    PLANNED = "PLANNED", "Kế hoạch"
+    PLANNED = "PLANNED", "Chưa bắt đầu"
     IN_PROGRESS = "IN_PROGRESS", "Đang thực hiện"
     DONE = "DONE", "Hoàn thành"
-    CANCELLED = "CANCELLED", "Huỷ"
+    CANCELLED = "CANCELLED", "Đã huỷ"
 
 
 class ProjectMilestone(TrackedModel):
@@ -329,9 +329,9 @@ class ProjectMilestone(TrackedModel):
 class TaskStatus(models.TextChoices):
     TODO = "TODO", "Chưa bắt đầu"
     IN_PROGRESS = "IN_PROGRESS", "Đang làm"
-    BLOCKED = "BLOCKED", "Bị vướng"
+    BLOCKED = "BLOCKED", "Đang vướng mắc"
     DONE = "DONE", "Hoàn thành"
-    CANCELLED = "CANCELLED", "Huỷ"
+    CANCELLED = "CANCELLED", "Đã huỷ"
 
 
 OPEN_TASK_STATUSES = (TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.BLOCKED)
@@ -452,7 +452,7 @@ class IssueStatus(models.TextChoices):
     OPEN = "OPEN", "Đang mở"
     IN_PROGRESS = "IN_PROGRESS", "Đang xử lý"
     RESOLVED = "RESOLVED", "Đã xử lý"
-    CLOSED = "CLOSED", "Đóng"
+    CLOSED = "CLOSED", "Đã đóng"
 
 
 OPEN_ISSUE_STATUSES = (IssueStatus.OPEN, IssueStatus.IN_PROGRESS)

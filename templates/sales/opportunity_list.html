@@ -8,8 +8,7 @@
     Đồng bộ thành công gần nhất: {{ sync_state.last_success_at|date:"d/m/Y H:i"|default:"chưa có" }}
   </span>
 </div>
-<p class="small text-muted">Bản sao chỉ đọc của dữ liệu Sales. Cơ hội đã thắng tự tạo hồ sơ bàn giao ở trạng thái "Chờ tiếp nhận"; hệ thống không tự tạo dự án.</p>
-{% include "integrations/_simulated_notice.html" with simulated=sync_state.last_run.is_simulated %}
+<p class="small text-muted">Dữ liệu cơ hội bán hàng được đồng bộ một chiều từ OplaCRM. Khi một cơ hội chuyển sang trạng thái “Thắng”, hệ thống tự lập hồ sơ bàn giao ở trạng thái “Chờ tiếp nhận”; dự án chỉ được tạo sau khi Phòng Dự án tiếp nhận.</p>
 
 <form class="row g-2 mb-3" method="get">
   <div class="col-12 col-md-6">
@@ -31,7 +30,7 @@
     <tbody>
     {% for o in opportunities %}
       <tr>
-        <td><span class="code">{{ o.external_id }}</span>{% if o.is_simulated %}<span class="cell-sub">Mô phỏng</span>{% endif %}</td>
+        <td><span class="code">{{ o.external_id }}</span></td>
         <td>{{ o.name }}</td>
         <td>{{ o.account|default:o.account_external_id }}</td>
         <td>{{ o.stage_name }}{% if o.is_won %} <span class="badge text-bg-success">Thắng</span>{% endif %}</td>
@@ -41,7 +40,7 @@
       </tr>
     {% empty %}
       <tr><td colspan="7" class="text-muted text-center py-4">
-        Chưa có dữ liệu. {% if can_view_integrations %}<a href="{% url 'integrations:status' %}">Chạy đồng bộ OplaCRM</a>{% endif %}
+        Chưa có dữ liệu. {% if can_view_integrations %}<a href="{% url 'integrations:status' %}">Đồng bộ từ OplaCRM</a>{% endif %}
       </td></tr>
     {% endfor %}
     </tbody>

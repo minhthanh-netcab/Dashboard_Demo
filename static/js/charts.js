@@ -163,6 +163,16 @@
       options: {
         cutout: "70%",
         layout: { padding: 6 },
+        // Announce slice clicks so a page can use the doughnut as a filter.
+        onClick: function (event, elements) {
+          if (!elements.length) return;
+          document.dispatchEvent(new CustomEvent("chartselect", {
+            detail: { source: options.source, index: elements[0].index },
+          }));
+        },
+        onHover: function (event, elements) {
+          event.native.target.style.cursor = elements.length ? "pointer" : "default";
+        },
         plugins: {
           legend: { display: false }, // replaced by the HTML legend table
           centerTotal: { label: options.centerLabel || "Tổng" },
@@ -172,31 +182,38 @@
     };
   }
 
+  // The first series is the primary measure (solid, filled when a -fill token
+  // exists); further series are comparisons drawn as dashed lines.
   function buildLine(payload) {
-    var ds = payload.datasets[0];
-    var color = vizColor(ds.color);
+    var datasets = payload.datasets.map(function (ds, i) {
+      var color = vizColor(ds.color);
+      var fill = i === 0 ? vizColor(ds.color + "-fill") : "";
+      return {
+        label: ds.label,
+        data: ds.data,
+        borderColor: color,
+        backgroundColor: fill || color,
+        fill: fill ? "origin" : false,
+        borderWidth: 2,
+        borderDash: i === 0 ? [] : [5, 4],
+        tension: 0, // straight segments: curves overshoot and suggest values that never happened
+        pointRadius: i === 0 ? 4 : 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: color,
+        pointBorderColor: SURFACE,
+        pointBorderWidth: 2,
+      };
+    });
     return {
       type: "line",
-      data: {
-        labels: payload.labels,
-        datasets: [{
-          label: ds.label,
-          data: ds.data,
-          borderColor: color,
-          backgroundColor: vizColor(ds.color + "-fill"),
-          fill: "origin",
-          borderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          pointBackgroundColor: color,
-          pointBorderColor: SURFACE,
-          pointBorderWidth: 2,
-        }],
-      },
+      data: { labels: payload.labels, datasets: datasets },
       options: {
         interaction: { mode: "index", intersect: false },
         scales: { x: categoryAxis({}), y: valueAxis({}) },
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: datasets.length > 1, position: "top", align: "end" },
+          tooltip: { callbacks: { title: titleCallback(payload) } },
+        },
       },
     };
   }
@@ -214,6 +231,7 @@
       max: el.dataset.max ? Number(el.dataset.max) : undefined,
       unit: el.dataset.unit || "",
       centerLabel: el.dataset.centerLabel,
+      source: el.dataset.source,
     };
   }
 
@@ -296,15 +314,25 @@
       }).join("") + "</tr>";
     }).join("");
     details.innerHTML =
-      "<summary>Xem dạng bảng</summary>" +
+      "<summary title=\"Xem dạng bảng\"><i class=\"bi bi-table\" aria-hidden=\"true\"></i><span class=\"visually-hidden\">Xem dạng bảng</span></summary>" +
       "<div class=\"table-responsive\"><table class=\"table table-sm mb-0\"><thead>" + head +
       "</thead><tbody>" + rows + "</tbody></table></div>";
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    if (!window.Chart) return;
+  function renderAll() {
     applyDefaults();
     document.querySelectorAll("canvas[data-chart]").forEach(renderCanvas);
     document.querySelectorAll("details.chart-table[data-source]").forEach(renderTable);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    if (!window.Chart) return;
+    // Chart.js measures legend text once; drawing before the web font has
+    // loaded lays the legend out with fallback-font widths and drops items.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(renderAll, renderAll);
+    } else {
+      renderAll();
+    }
   });
 })();

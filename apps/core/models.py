@@ -25,9 +25,9 @@ class StatusSource(models.TextChoices):
     requires evidence.
     """
 
-    DEMO = "DEMO", "Dữ liệu mẫu"
-    INTERNAL = "INTERNAL", "Cập nhật nội bộ (không phải trạng thái MISA)"
-    MISA_REFERENCED = "MISA_REFERENCED", "Người dùng đối chiếu từ MISA (có bằng chứng)"
+    DEMO = "DEMO", "Dữ liệu khởi tạo"
+    INTERNAL = "INTERNAL", "Ghi nhận nội bộ"
+    MISA_REFERENCED = "MISA_REFERENCED", "Đã đối chiếu với MISA (có chứng từ)"
 
 
 class TrackedModel(models.Model):

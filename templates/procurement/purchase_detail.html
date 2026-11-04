@@ -11,7 +11,7 @@
 </nav>
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
   <div>
-    <h1 class="h4 mb-1">Đề nghị mua hàng {{ purchase.request_number }}{% if purchase.is_demo_data %} <span class="badge text-bg-warning align-middle">Dữ liệu mẫu</span>{% endif %}</h1>
+    <h1 class="h4 mb-1">Đề nghị mua hàng {{ purchase.request_number }}</h1>
     <div class="text-muted small">{{ purchase.title }} · Người đề nghị: {{ purchase.requester }} · {{ purchase.request_date|date:"d/m/Y" }}</div>
   </div>
   {% if is_pm %}<a class="btn btn-outline-primary btn-sm" href="{% url 'procurement:update' project.pk purchase.pk %}">Sửa đề nghị</a>{% endif %}

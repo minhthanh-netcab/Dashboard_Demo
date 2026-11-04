@@ -4,5 +4,5 @@
   · Số liệu tại ngày {{ batch.as_of_date|date:"d/m/Y" }}{% if batch.period_label %} ({{ batch.period_label }}){% endif %}
   · Nhập lúc {{ batch.imported_at|date:"d/m/Y H:i" }}{% if batch.imported_by %} bởi {{ batch.imported_by }}{% endif %}
   {% if batch.source_filename %}· File {{ batch.source_filename }}{% endif %}
-  {% if batch.is_simulated %}<span class="badge text-bg-warning">Mô phỏng</span>{% endif %}
+
 </div>

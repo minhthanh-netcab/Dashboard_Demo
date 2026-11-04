@@ -76,7 +76,7 @@ class SalesHandoverForm(ScopedModelForm):
             "boq_reference",
         ]
         help_texts = {
-            "external_opportunity_id": "Nếu có. Mỗi Opportunity chỉ được bàn giao một lần.",
+            "external_opportunity_id": "Không bắt buộc. Mỗi cơ hội chỉ được lập một hồ sơ bàn giao.",
         }
 
     def clean_external_opportunity_id(self):
@@ -88,7 +88,7 @@ class SalesHandoverForm(ScopedModelForm):
                 source_system=self.instance.source_system, external_opportunity_id=value
             ).exclude(pk=self.instance.pk)
             if duplicates.exists():
-                raise forms.ValidationError("Opportunity này đã có hồ sơ bàn giao.")
+                raise forms.ValidationError("Cơ hội này đã có hồ sơ bàn giao.")
         return value
 
 

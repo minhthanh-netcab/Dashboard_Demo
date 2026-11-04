@@ -1,16 +1,16 @@
 {
   "_comment": "DỮ LIỆU MÔ PHỎNG theo định dạng record nội bộ (apps/integrations/records.py). KHÔNG phải response thật của MISA; đối tượng là hư cấu. Số dư theo ĐỐI TƯỢNG, không theo dự án.",
   "debt_balances": [
-    {"counterparty_code": "SIM-KH-001", "counterparty_name": "Công ty Mô Phỏng Hoà Bình (SIM)", "receivable_amount": "430000000", "payable_amount": "0"},
-    {"counterparty_code": "SIM-KH-002", "counterparty_name": "Công ty Mô Phỏng Sông Hồng (SIM)", "receivable_amount": "125500000", "payable_amount": "0"},
-    {"counterparty_code": "SIM-KH-003", "counterparty_name": "Công ty Mô Phỏng Bến Thành (SIM)", "receivable_amount": "0", "payable_amount": "0"},
-    {"counterparty_code": "SIM-NCC-001", "counterparty_name": "Nhà cung cấp Mô Phỏng An Phát (SIM)", "receivable_amount": "0", "payable_amount": "212000000"},
-    {"counterparty_code": "SIM-NCC-002", "counterparty_name": "Nhà cung cấp Mô Phỏng Minh Long (SIM)", "receivable_amount": "0", "payable_amount": "57800000"}
+    {"counterparty_code": "KH-0101", "counterparty_name": "Công ty CP Xây lắp Điện Phú Thịnh", "receivable_amount": "430000000", "payable_amount": "0"},
+    {"counterparty_code": "KH-0102", "counterparty_name": "Công ty TNHH Giải pháp Văn phòng Sông Hồng", "receivable_amount": "125500000", "payable_amount": "0"},
+    {"counterparty_code": "KH-0103", "counterparty_name": "Công ty CP Chuỗi Bán lẻ Bến Nghé", "receivable_amount": "0", "payable_amount": "0"},
+    {"counterparty_code": "NCC-0201", "counterparty_name": "Công ty TNHH Thiết bị An ninh Việt Phát", "receivable_amount": "0", "payable_amount": "212000000"},
+    {"counterparty_code": "NCC-0202", "counterparty_name": "Công ty CP Thiết bị Mã vạch Kim Long", "receivable_amount": "0", "payable_amount": "57800000"}
   ],
   "inventory_balances": [
-    {"item_code": "SIM-CAM-4MP", "item_name": "Camera IP 4MP (SIM)", "warehouse_code": "KHO-HN", "quantity": "36", "unit": "cái", "amount": "90000000"},
-    {"item_code": "SIM-NVR-64", "item_name": "Đầu ghi 64 kênh (SIM)", "warehouse_code": "KHO-HN", "quantity": "2", "unit": "bộ", "amount": "90000000"},
-    {"item_code": "SIM-SW-24P", "item_name": "Switch 24 cổng PoE (SIM)", "warehouse_code": "KHO-HCM", "quantity": "8", "unit": "cái", "amount": "64000000"},
-    {"item_code": "SIM-CAB-CAT6", "item_name": "Cáp mạng Cat6 (SIM)", "warehouse_code": "KHO-HCM", "quantity": "1200", "unit": "m", "amount": "9600000"}
+    {"item_code": "CAM-IP-4MP", "item_name": "Camera IP 4MP", "warehouse_code": "KHO-HN", "quantity": "36", "unit": "cái", "amount": "90000000"},
+    {"item_code": "NVR-64CH", "item_name": "Đầu ghi hình 64 kênh", "warehouse_code": "KHO-HN", "quantity": "2", "unit": "bộ", "amount": "90000000"},
+    {"item_code": "SW-24P-POE", "item_name": "Switch 24 cổng PoE", "warehouse_code": "KHO-HCM", "quantity": "8", "unit": "cái", "amount": "64000000"},
+    {"item_code": "CAB-CAT6", "item_name": "Cáp mạng Cat6", "warehouse_code": "KHO-HCM", "quantity": "1200", "unit": "m", "amount": "9600000"}
   ]
 }

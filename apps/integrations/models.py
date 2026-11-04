@@ -3,14 +3,23 @@ from django.db import models
 from django.utils import timezone
 
 
+# Display names for the `entity` keys used by sync jobs. Unknown keys fall back to the raw key.
+ENTITY_LABELS = {
+    "accounts": "Khách hàng",
+    "opportunities": "Cơ hội bán hàng",
+    "debt_balances": "Công nợ theo đối tượng",
+    "inventory_balances": "Tồn kho theo kho",
+}
+
+
 class ExternalSystem(models.TextChoices):
     OPLACRM = "OPLACRM", "OplaCRM"
     MISA_ACT = "MISA_ACT", "MISA AMIS (ACT Open API)"
 
 
 class SyncMode(models.TextChoices):
-    MOCK = "MOCK", "Mô phỏng"
-    LIVE = "LIVE", "Thật"
+    MOCK = "MOCK", "Ngoại tuyến"
+    LIVE = "LIVE", "Trực tuyến"
 
 
 class SyncStatus(models.TextChoices):
@@ -56,6 +65,10 @@ class SyncRun(models.Model):
         return f"{self.get_system_display()} / {self.entity} @ {self.started_at:%d/%m/%Y %H:%M}"
 
     @property
+    def entity_label(self):
+        return ENTITY_LABELS.get(self.entity, self.entity)
+
+    @property
     def is_simulated(self):
         return self.mode == SyncMode.MOCK
 
@@ -69,7 +82,7 @@ class SyncState(models.Model):
 
     system = models.CharField("Hệ thống", max_length=20, choices=ExternalSystem.choices)
     entity = models.CharField("Loại dữ liệu", max_length=50)
-    cursor = models.CharField("Con trỏ đồng bộ", max_length=100, blank=True)
+    cursor = models.CharField("Mốc đồng bộ tăng dần", max_length=100, blank=True)
     last_success_at = models.DateTimeField("Thành công gần nhất", null=True, blank=True)
     last_run = models.ForeignKey(SyncRun, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
 
@@ -81,3 +94,7 @@ class SyncState(models.Model):
 
     def __str__(self):
         return f"{self.get_system_display()} / {self.entity}"
+
+    @property
+    def entity_label(self):
+        return ENTITY_LABELS.get(self.entity, self.entity)

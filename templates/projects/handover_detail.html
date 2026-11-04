@@ -11,7 +11,7 @@
 {% with project=handover.linked_project %}
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
   <div>
-    <h1 class="h4 mb-1">{{ handover.deal_name }}{% if handover.is_demo_data %} <span class="badge text-bg-warning align-middle">Dữ liệu mẫu</span>{% endif %}</h1>
+    <h1 class="h4 mb-1">{{ handover.deal_name }}</h1>
     <div class="text-muted small">{{ handover.customer_name }} · Nguồn: {{ handover.get_source_system_display }}</div>
   </div>
   <span class="badge fs-6 text-bg-{{ handover.status|badge }}">{{ handover.get_status_display }}</span>
@@ -20,11 +20,11 @@
 <div class="row g-3">
   <div class="col-12 col-lg-7">
     <div class="card shadow-sm"><div class="card-body">
-      <h2 class="h6 text-muted">Thông tin Sales cam kết</h2>
+      <h2 class="h6 text-muted">Cam kết từ Phòng Kinh doanh</h2>
       <dl class="row small mb-0">
-        <dt class="col-5">Mã Opportunity</dt><dd class="col-7">{{ handover.external_opportunity_id|default:"—" }}</dd>
-        <dt class="col-5">Mã Account</dt><dd class="col-7">{{ handover.external_account_id|default:"—" }}</dd>
-        <dt class="col-5">Phụ trách Sales</dt><dd class="col-7">{{ handover.sales_owner_name|default:"—" }}</dd>
+        <dt class="col-5">Mã cơ hội (OplaCRM)</dt><dd class="col-7">{{ handover.external_opportunity_id|default:"—" }}</dd>
+        <dt class="col-5">Mã khách hàng (OplaCRM)</dt><dd class="col-7">{{ handover.external_account_id|default:"—" }}</dd>
+        <dt class="col-5">Nhân viên kinh doanh</dt><dd class="col-7">{{ handover.sales_owner_name|default:"—" }}</dd>
         {% if can_view_finance %}<dt class="col-5">Giá trị bán</dt><dd class="col-7">{{ handover.committed_value|money:handover.currency }}</dd>{% endif %}
         <dt class="col-5">Thời gian cam kết</dt><dd class="col-7">{{ handover.committed_start_date|date:"d/m/Y"|default:"?" }} → {{ handover.committed_end_date|date:"d/m/Y"|default:"?" }}</dd>
         <dt class="col-5">BOQ / báo giá</dt><dd class="col-7">{{ handover.boq_reference|default:"—" }}</dd>
@@ -34,10 +34,10 @@
   </div>
   <div class="col-12 col-lg-5">
     <div class="card shadow-sm"><div class="card-body">
-      <h2 class="h6 text-muted">Tiếp nhận (Project)</h2>
+      <h2 class="h6 text-muted">Tiếp nhận của Phòng Dự án</h2>
       <dl class="row small">
         <dt class="col-5">Người tiếp nhận</dt><dd class="col-7">{{ handover.reviewed_by|default:"—" }}</dd>
-        <dt class="col-5">Thời điểm</dt><dd class="col-7">{{ handover.reviewed_at|date:"d/m/Y H:i"|default:"—" }}</dd>
+        <dt class="col-5">Thời điểm tiếp nhận</dt><dd class="col-7">{{ handover.reviewed_at|date:"d/m/Y H:i"|default:"—" }}</dd>
         <dt class="col-5">Ghi chú</dt><dd class="col-7">{{ handover.review_note|linebreaksbr|default:"—" }}</dd>
         <dt class="col-5">Dự án</dt><dd class="col-7">{% if project %}{{ project.code }} – {{ project.name }}{% else %}Chưa tạo{% endif %}</dd>
       </dl>
@@ -46,8 +46,8 @@
           {% if project %}
             <a class="btn btn-primary btn-sm" href="{{ project.get_absolute_url }}">Mở dự án</a>
           {% else %}
-            <a class="btn btn-outline-primary btn-sm" href="{% url 'projects:handover_review' handover.pk %}">Ghi nhận tiếp nhận</a>
-            <a class="btn btn-outline-secondary btn-sm" href="{% url 'projects:handover_update' handover.pk %}">Sửa hồ sơ</a>
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'projects:handover_review' handover.pk %}">Xử lý tiếp nhận</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'projects:handover_update' handover.pk %}">Chỉnh sửa hồ sơ</a>
             {% if handover.status == "ACCEPTED" %}
               <a class="btn btn-primary btn-sm" href="{% url 'projects:handover_create_project' handover.pk %}">Tạo dự án từ bàn giao</a>
             {% endif %}

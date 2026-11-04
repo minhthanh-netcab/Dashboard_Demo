@@ -2,180 +2,309 @@
 {% load static ui %}
 {% block title %}Tổng quan{% endblock %}
 {% block content %}
-<header class="page-head">
+{# Command bar, as in Power Apps: page title left, actions right. #}
+<header class="cmdbar">
   <div>
     <h1 class="page-title">Tổng quan dự án</h1>
-    <p class="page-subtitle">Số liệu tại ngày {{ today|date:"d/m/Y" }}</p>
+    <p class="page-subtitle">Cập nhật {{ generated_at|date:"H:i d/m/Y" }}</p>
   </div>
-  <a class="btn btn-primary" href="{% url 'projects:create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Tạo dự án</a>
+  <div class="cmdbar-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'dashboard:pm' %}"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Làm mới</a>
+    <a class="btn btn-primary" href="{% url 'projects:create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Dự án mới</a>
+  </div>
 </header>
 
-{# Level 1 — headline numbers, each with its denominator. #}
-<section class="stat-strip" aria-label="Chỉ số chính">
-  <a class="stat" href="{% url 'projects:list' %}">
-    <span class="stat-label">Dự án đang thực hiện</span>
-    <span class="stat-value">{{ kpis.active_projects }}</span>
-    <span class="stat-context">trên tổng {{ kpis.total_projects }} dự án</span>
+{# KPI cards: one number each, one short line under it. #}
+<section class="kpi-row" aria-label="Chỉ số chính">
+  <a class="kpi" href="{% url 'projects:list' %}">
+    <span class="kpi-label">Đang triển khai</span>
+    <span class="kpi-value">{{ kpis.active_projects }}</span>
+    <span class="kpi-sub">Tổng {{ kpis.total_projects }} dự án</span>
   </a>
-  <a class="stat" href="#health">
-    <span class="stat-label">Dự án cần chú ý</span>
-    <span class="stat-value{% if kpis.needs_attention %} is-negative{% endif %}">{{ kpis.needs_attention }}</span>
-    <span class="stat-context">trong {{ kpis.active_projects }} dự án đang thực hiện</span>
+  <a class="kpi{% if kpis.needs_attention %} kpi--alert{% endif %}" href="#projects">
+    <span class="kpi-label">Cần chú ý</span>
+    <span class="kpi-value">{{ kpis.needs_attention }}</span>
+    <span class="kpi-sub">{{ kpis.red_projects }} nguy cơ cao</span>
   </a>
-  <a class="stat" href="#actions">
-    <span class="stat-label">Việc quá hạn</span>
-    <span class="stat-value{% if kpis.overdue_tasks %} is-negative{% endif %}">{{ kpis.overdue_tasks }}</span>
-    <span class="stat-context">trên {{ kpis.open_tasks }} việc đang mở</span>
+  <a class="kpi{% if kpis.overdue_tasks %} kpi--alert{% endif %}" href="#actions">
+    <span class="kpi-label">Việc quá hạn</span>
+    <span class="kpi-value">{{ kpis.overdue_tasks }}</span>
+    <span class="kpi-sub">{{ kpis.open_tasks }} việc đang mở</span>
   </a>
-  <a class="stat" href="{% url 'projects:handover_list' %}">
-    <span class="stat-label">Bàn giao chờ tiếp nhận</span>
-    <span class="stat-value">{{ kpis.pending_handovers }}</span>
-    <span class="stat-context">{{ kpis.handovers_needing_info }} đang chờ Sales bổ sung</span>
+  <a class="kpi" href="#delivery">
+    <span class="kpi-label">Hoàn thành 7 ngày</span>
+    <span class="kpi-value">{{ kpis.done_7d }}</span>
+    <span class="kpi-sub">
+      {% if kpis.done_7d > kpis.done_prev_7d %}<i class="bi bi-caret-up-fill trend-up" aria-hidden="true"></i> {{ kpis.done_delta }} so với kỳ trước
+      {% elif kpis.done_7d < kpis.done_prev_7d %}<i class="bi bi-caret-down-fill trend-down" aria-hidden="true"></i> {{ kpis.done_delta }} so với kỳ trước
+      {% else %}Bằng kỳ trước{% endif %}
+    </span>
+  </a>
+  <a class="kpi" href="#milestones">
+    <span class="kpi-label">Mốc {{ upcoming_milestone_days }} ngày tới</span>
+    <span class="kpi-value">{{ upcoming_milestone_count }}</span>
+    <span class="kpi-sub">{% with m=upcoming_milestones.0 %}{% if m %}Gần nhất {{ m.due_date|date:"d/m" }}{% else %}Chưa có mốc{% endif %}{% endwith %}</span>
   </a>
 </section>
 
-{# Level 2 — where the work is, and when it lands. #}
+{# Health doughnut doubles as the page slicer, like a Power BI cross-filter. #}
 <div class="row g-3 mb-3">
-  <div class="col-12 col-xl-7">
-    {% include "dashboard/_chart_card.html" with title="Cơ cấu công việc theo dự án" source="chart-task-mix" type="stacked-bar" horizontal=True note="Số công việc theo trạng thái, dự án đang thực hiện" %}
+  <div class="col-12 col-xl-3">
+    <section class="card h-100" aria-labelledby="health-title">
+      <div class="card-body">
+        <header class="tile-head">
+          <h2 class="card-title" id="health-title">Sức khoẻ dự án</h2>
+          <i class="bi bi-info-circle tile-info" tabindex="0" role="img"
+             aria-label="Cách xếp loại" data-bs-toggle="tooltip" data-bs-placement="left"
+             data-bs-title="Nguy cơ cao: quá hạn kết thúc, có vấn đề nghiêm trọng hoặc từ 3 việc quá hạn. Cần theo dõi: có việc quá hạn, mốc trễ, việc vướng mắc hoặc vấn đề mức cao."></i>
+        </header>
+        <div class="chart-box health-donut">
+          <canvas data-chart="doughnut" data-source="chart-health" data-center-label="dự án" role="img" aria-label="Sức khoẻ dự án"></canvas>
+        </div>
+        <div class="slicer" role="group" aria-label="Lọc theo sức khoẻ">
+          {% for h in health_summary %}
+            <button type="button" class="slicer-item" data-health-filter="{{ h.level }}" aria-pressed="false">
+              <span class="health-dot health-bg--{{ h.level }}"></span>{{ h.label }}<span class="slicer-count">{{ h.count }}</span>
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
   </div>
-  <div class="col-12 col-xl-5">
-    {% include "dashboard/_chart_card.html" with title="Việc đang mở theo hạn hoàn thành" source="chart-due-load" type="doughnut" center="việc đang mở" note="Màu càng đậm càng gần hạn; đỏ là việc đã quá hạn" %}
+
+  <div class="col-12 col-xl-9">
+    <section class="card h-100" aria-labelledby="roadmap-title">
+      <div class="card-body">
+        <header class="tile-head">
+          <h2 class="card-title" id="roadmap-title">Lộ trình</h2>
+          <ul class="roadmap-key" aria-label="Chú giải">
+            <li><span class="ms-key"></span>Mốc</li>
+            <li><span class="ms-key is-done"></span>Đã xong</li>
+            <li><span class="today-key"></span>Hôm nay</li>
+          </ul>
+        </header>
+        {% if roadmap.rows %}
+        <div class="roadmap-scroll">
+          <div class="roadmap">
+            <div class="roadmap-row roadmap-row--head" aria-hidden="true">
+              <div class="roadmap-label"></div>
+              <div class="roadmap-track">
+                {% for m in roadmap.months %}<span class="roadmap-month" style="left: {{ m.left }}%">{{ m.label }}</span>{% endfor %}
+              </div>
+            </div>
+            {% for item in roadmap.rows %}
+              {% with row=item.row p=item.row.project %}
+              <div class="roadmap-row" data-health="{{ row.health }}">
+                <div class="roadmap-label">
+                  <a class="cell-title" href="{{ p.get_absolute_url }}#plan" title="{{ p.name }}">{{ p.name }}</a>
+                </div>
+                <div class="roadmap-track">
+                  {% for m in roadmap.months %}<span class="roadmap-grid" style="left: {{ m.left }}%"></span>{% endfor %}
+                  {% if item.bar %}
+                    <span class="roadmap-bar health-bar--{{ row.health }}{% if item.bar.cut_start %} cut-start{% endif %}{% if item.bar.cut_end %} cut-end{% endif %}"
+                          style="left: {{ item.bar.left }}%; width: {{ item.bar.width }}%"
+                          title="{{ p.code }} · {{ p.planned_start_date|date:'d/m/Y'|default:'?' }} → {{ p.planned_end_date|date:'d/m/Y'|default:'?' }} · {{ row.health_label }}"></span>
+                  {% else %}
+                    <span class="roadmap-none">Chưa có lịch</span>
+                  {% endif %}
+                  {% for m in item.milestones %}
+                    <span class="ms{% if m.done %} is-done{% elif m.overdue %} is-late{% endif %}" style="left: {{ m.left }}%"
+                          title="{{ m.name }} · {{ m.due_date|date:'d/m/Y' }}{% if m.overdue %} · trễ{% endif %}">
+                      <span class="visually-hidden">Mốc {{ m.name }}, {{ m.due_date|date:"d/m/Y" }}</span>
+                    </span>
+                  {% endfor %}
+                  <span class="roadmap-today" style="left: {{ roadmap.today }}%" aria-hidden="true"></span>
+                </div>
+              </div>
+              {% endwith %}
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+          <p class="chart-empty py-4">Chưa có dự án đang triển khai.</p>
+        {% endif %}
+      </div>
+    </section>
   </div>
 </div>
 
-<section class="card mb-3" id="health">
+{# Project table: one row per project, reasons in the tooltip. #}
+<section class="card mb-3" id="projects" aria-labelledby="projects-title">
   <div class="card-body">
-    <header class="card-head">
-      <h2 class="card-title">Tình hình các dự án</h2>
-      <a class="card-link" href="{% url 'projects:list' %}">Tất cả dự án</a>
+    <header class="tile-head">
+      <h2 class="card-title" id="projects-title">Danh sách dự án</h2>
+      <div class="d-flex align-items-center gap-3">
+        <button type="button" class="filter-chip" data-health-filter="all" hidden>
+          <span data-filter-label></span><i class="bi bi-x-lg" aria-hidden="true"></i><span class="visually-hidden">Bỏ lọc</span>
+        </button>
+        <a class="card-link" href="{% url 'projects:list' %}">Xem tất cả</a>
+      </div>
     </header>
     <div class="table-responsive">
       <table class="table data-table mb-0">
         <thead>
           <tr>
             <th scope="col">Dự án</th>
-            <th scope="col">Quản lý</th>
-            <th scope="col">Trạng thái</th>
-            <th scope="col">Kết thúc</th>
-            <th scope="col" class="col-progress">Tiến độ báo cáo</th>
+            <th scope="col">Sức khoẻ</th>
+            <th scope="col" class="col-progress">Tiến độ</th>
             <th scope="col" class="text-end">Việc mở</th>
-            <th scope="col">Tình trạng</th>
+            <th scope="col" class="text-end">Quá hạn</th>
+            <th scope="col">Mốc kế tiếp</th>
+            <th scope="col" class="text-end">Kết thúc</th>
           </tr>
         </thead>
         <tbody>
         {% for row in project_health %}
           {% with p=row.project %}
-          <tr>
+          <tr data-health="{{ row.health }}">
             <td>
-              <a class="cell-title" href="{{ p.get_absolute_url }}">{{ p.name }}</a>
-              <span class="cell-sub"><span class="code">{{ p.code }}</span>{{ p.customer_name }}</span>
+              <a class="cell-title" href="{{ p.get_absolute_url }}" title="{{ p.customer_name }} · {{ p.manager }}">{{ p.name }}</a>
+              <span class="cell-sub code">{{ p.code }}</span>
             </td>
-            <td class="text-nowrap">{{ p.manager }}</td>
-            <td><span class="badge text-bg-{{ p.status|badge }}">{{ p.get_status_display }}</span></td>
-            <td class="text-nowrap num">{{ p.planned_end_date|date:"d/m/Y"|default:"—" }}</td>
+            <td>
+              <span class="health health--{{ row.health }}"{% if row.reasons %} data-bs-toggle="tooltip" data-bs-title="{{ row.reasons|join:' · ' }}" tabindex="0"{% endif %}>{{ row.health_label }}</span>
+              {% if row.reasons %}<span class="visually-hidden">: {{ row.reasons|join:", " }}</span>{% endif %}
+            </td>
             <td class="col-progress">
               {% if p.latest_percent is not None %}
-                <div class="meter" role="img" aria-label="{{ p.latest_percent }}% tự báo cáo">
+                <div class="meter" role="img" aria-label="{{ p.latest_percent }}%">
                   <span class="meter-bar"><span style="width: {{ p.latest_percent }}%"></span></span>
                   <span class="meter-value">{{ p.latest_percent }}%</span>
                 </div>
               {% else %}<span class="text-muted">—</span>{% endif %}
             </td>
             <td class="text-end num">{{ row.open_tasks }}</td>
+            <td class="text-end num{% if row.overdue_tasks %} is-negative fw-semibold{% endif %}">{{ row.overdue_tasks|default:"—" }}</td>
             <td>
-              {% if row.needs_attention %}
-                <span class="badge text-bg-danger">Cần chú ý</span>
-                <span class="cell-sub">{{ row.reasons|join:" · " }}</span>
-              {% else %}
-                <span class="badge text-bg-success">Đúng tiến độ</span>
-              {% endif %}
+              {% with m=row.next_milestone %}
+              {% if m %}{{ m.name }} <span class="text-muted num">· {{ m.due_date|date:"d/m" }}</span>{% else %}<span class="text-muted">—</span>{% endif %}
+              {% endwith %}
+            </td>
+            <td class="text-end text-nowrap num{% if p.is_overdue %} is-negative fw-semibold{% endif %}"
+                {% if p.is_overdue %}title="Trễ {{ today|days_from:p.planned_end_date }} ngày"{% endif %}>
+              {{ p.planned_end_date|date:"d/m/Y"|default:"—" }}
             </td>
           </tr>
           {% endwith %}
         {% empty %}
-          <tr><td colspan="7" class="text-center text-muted py-4">Chưa có dự án đang thực hiện.</td></tr>
+          <tr><td colspan="7" class="text-center text-muted py-4">Chưa có dự án đang triển khai.</td></tr>
         {% endfor %}
         </tbody>
       </table>
     </div>
-    <p class="card-foot">Cần chú ý (quy tắc demo): quá ngày kết thúc, có việc quá hạn, hoặc có vấn đề mức Cao trở lên đang mở. Tiến độ là số % do người dùng báo cáo.</p>
   </div>
 </section>
 
-{# Level 3 — what to act on now, and what is coming. #}
-<div class="row g-3">
-  <div class="col-12 col-lg-7">
-    <section class="card h-100" id="actions">
+<div class="row g-3 mb-3">
+  <div class="col-12 col-xl-6">
+    <section class="card h-100" id="actions" aria-labelledby="actions-title">
       <div class="card-body">
-        <header class="card-head">
-          <h2 class="card-title">Cần xử lý</h2>
-          <span class="card-meta">{{ kpis.overdue_tasks }} việc quá hạn · {{ serious_issue_count }} vấn đề mức cao</span>
+        <header class="tile-head">
+          <h2 class="card-title" id="actions-title">Việc cần xử lý</h2>
+          <span class="tile-count">{{ kpis.overdue_tasks|add:serious_issue_count }}</span>
         </header>
-        <table class="table data-table row-list mb-0">
-          <tbody>
+        <ul class="item-list">
           {% for i in action_issues %}
-            <tr>
-              <td class="row-kind"><span class="badge text-bg-danger">Vấn đề {{ i.get_severity_display|lower }}</span></td>
-              <td>
+            <li>
+              <span class="item-icon is-issue" title="Vấn đề {{ i.get_severity_display|lower }}"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i></span>
+              <span class="item-main">
                 <a class="cell-title" href="{% url 'projects:issue_update' i.project.pk i.pk %}">{{ i.title }}</a>
-                <span class="cell-sub"><span class="code">{{ i.project.code }}</span>{{ i.assignee|default:"Chưa giao người xử lý" }}</span>
-              </td>
-              <td class="text-end text-nowrap text-muted">Mở từ {{ i.created_at|date:"d/m" }}</td>
-            </tr>
+                <span class="cell-sub"><span class="code">{{ i.project.code }}</span>{{ i.assignee|default:"Chưa giao" }}</span>
+              </span>
+              <span class="item-meta">{{ i.get_severity_display }}</span>
+            </li>
           {% endfor %}
           {% for t in action_tasks %}
-            <tr>
-              <td class="row-kind"><span class="badge text-bg-warning">Quá hạn</span></td>
-              <td>
+            <li>
+              <span class="item-icon is-late" title="Quá hạn"><i class="bi bi-clock-fill" aria-hidden="true"></i></span>
+              <span class="item-main">
                 <a class="cell-title" href="{{ t.project.get_absolute_url }}#plan">{{ t.title }}</a>
                 <span class="cell-sub"><span class="code">{{ t.project.code }}</span>{{ t.assignee|default:"Chưa giao" }}</span>
-              </td>
-              <td class="text-end text-nowrap num is-negative">Trễ {{ today|days_from:t.due_date }} ngày</td>
-            </tr>
+              </span>
+              <span class="item-meta is-negative">Trễ {{ today|days_from:t.due_date }} ngày</span>
+            </li>
           {% endfor %}
           {% if not action_issues and not action_tasks %}
-            <tr><td class="text-center text-muted py-4">Không có việc quá hạn hay vấn đề mức cao.</td></tr>
+            <li class="item-empty">Không có việc tồn đọng.</li>
           {% endif %}
-          </tbody>
-        </table>
+        </ul>
       </div>
     </section>
   </div>
 
-  <div class="col-12 col-lg-5">
-    <section class="card h-100">
+  <div class="col-12 col-md-6 col-xl-3">
+    <section class="card h-100" id="milestones" aria-labelledby="ms-title">
       <div class="card-body">
-        <header class="card-head">
-          <h2 class="card-title">Mốc sắp đến hạn</h2>
-          <span class="card-meta">{{ upcoming_milestone_count }} mốc trong {{ upcoming_milestone_days }} ngày</span>
+        <header class="tile-head">
+          <h2 class="card-title" id="ms-title">Mốc sắp tới</h2>
+          <span class="tile-count">{{ upcoming_milestone_count }}</span>
         </header>
-        <table class="table data-table row-list mb-0">
-          <tbody>
+        <ul class="item-list">
           {% for m in upcoming_milestones %}
-            <tr>
-              <td class="row-date num">{{ m.due_date|date:"d/m" }}</td>
-              <td>
+            <li>
+              <span class="item-date num"><b>{{ m.due_date|date:"d" }}</b>Th{{ m.due_date|date:"n" }}</span>
+              <span class="item-main">
                 <span class="cell-title">{{ m.name }}</span>
-                <span class="cell-sub"><a class="code" href="{{ m.project.get_absolute_url }}#plan">{{ m.project.code }}</a>{{ m.project.name }}</span>
-              </td>
-              <td class="text-end text-nowrap num text-muted">{% if m.due_date == today %}Hôm nay{% else %}Còn {{ m.due_date|days_from:today }} ngày{% endif %}</td>
-            </tr>
+                <a class="cell-sub code" href="{{ m.project.get_absolute_url }}#plan" title="{{ m.project.name }}">{{ m.project.code }}</a>
+              </span>
+            </li>
           {% empty %}
-            <tr><td class="text-center text-muted py-4">Không có mốc nào trong {{ upcoming_milestone_days }} ngày tới.</td></tr>
+            <li class="item-empty">Không có mốc trong {{ upcoming_milestone_days }} ngày tới.</li>
           {% endfor %}
-          </tbody>
-        </table>
+        </ul>
       </div>
     </section>
+  </div>
+
+  <div class="col-12 col-md-6 col-xl-3">
+    {% with x=cross_department %}
+    <section class="card h-100" aria-labelledby="xdept-title">
+      <div class="card-body">
+        <header class="tile-head">
+          <h2 class="card-title" id="xdept-title">Chờ phối hợp</h2>
+          <i class="bi bi-info-circle tile-info" tabindex="0" role="img" aria-label="Ghi chú"
+             data-bs-toggle="tooltip" data-bs-placement="left"
+             data-bs-title="Đề nghị quá {{ x.stale_days }} ngày chưa cập nhật trạng thái. Phê duyệt chính thức vẫn trên MISA."></i>
+        </header>
+        <ul class="item-list">
+          <li>
+            <span class="item-icon"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i></span>
+            <a class="item-main cell-title" href="{% url 'projects:handover_list' %}">Bàn giao chờ nhận</a>
+            <span class="item-num">{{ x.handovers.open }}</span>
+          </li>
+          <li>
+            <span class="item-icon"><i class="bi bi-cart-check" aria-hidden="true"></i></span>
+            <span class="item-main cell-title">Mua hàng chưa cập nhật</span>
+            <span class="item-num{% if x.purchases.stale %} is-warn{% endif %}">{{ x.purchases.stale }}<small>/{{ x.purchases.open }}</small></span>
+          </li>
+          <li>
+            <span class="item-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i></span>
+            <span class="item-main cell-title">Thanh toán chưa cập nhật</span>
+            <span class="item-num{% if x.payments.stale %} is-warn{% endif %}">{{ x.payments.stale }}<small>/{{ x.payments.open }}</small></span>
+          </li>
+        </ul>
+      </div>
+    </section>
+    {% endwith %}
   </div>
 </div>
 
-{{ task_mix_chart|json_script:"chart-task-mix" }}
-{{ due_load_chart|json_script:"chart-due-load" }}
+<div class="row g-3" id="delivery">
+  <div class="col-12 col-xl-6">
+    {% include "dashboard/_chart_card.html" with title="Khối lượng theo người" source="chart-workload" type="stacked-bar" horizontal=True size="sm" %}
+  </div>
+  <div class="col-12 col-xl-6">
+    {% include "dashboard/_chart_card.html" with title="Hoàn thành theo tuần" source="chart-throughput" type="line" size="sm" %}
+  </div>
+</div>
+
+{{ health_chart|json_script:"chart-health" }}
+{{ workload_chart|json_script:"chart-workload" }}
+{{ throughput_chart|json_script:"chart-throughput" }}
 {% endblock %}
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script src="{% static 'js/charts.js' %}"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}

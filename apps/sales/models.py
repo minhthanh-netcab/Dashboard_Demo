@@ -54,7 +54,7 @@ class SalesOpportunity(SyncedRecord):
     stage_name = models.CharField("Giai đoạn", max_length=100, blank=True)
     is_won = models.BooleanField("Đã thắng", default=False)
     expected_close_date = models.DateField("Ngày chốt dự kiến", null=True, blank=True)
-    owner_name = models.CharField("Phụ trách Sales", max_length=255, blank=True)
+    owner_name = models.CharField("Nhân viên kinh doanh", max_length=255, blank=True)
 
     class Meta:
         ordering = ["-source_updated_at", "name"]

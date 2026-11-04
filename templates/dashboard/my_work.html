@@ -20,7 +20,7 @@
 
 {% if stale_tasks %}
 <div class="alert alert-warning small">
-  <strong>Cần cập nhật tiến độ</strong> <span class="badge text-bg-light border fw-normal">quy tắc demo</span>: công việc đang làm nhưng chưa có cập nhật trong {{ stale_progress_days }} ngày qua —
+  <strong>Cần cập nhật tiến độ:</strong> các công việc đang thực hiện chưa có báo cáo mới trong {{ stale_progress_days }} ngày gần nhất —
   {% for t in stale_tasks %}<a href="{% url 'projects:task_status' t.project.pk t.pk %}">{{ t.title }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.
 </div>
 {% endif %}

@@ -1,7 +1,8 @@
 """Read-only aggregations over the operational data.
 
-The time windows and the "needs attention" rule are demo rules, not approved
-business definitions; they are labelled as such in the templates.
+The time windows and the project health (RAG) rules are working assumptions,
+not approved business definitions (docs/OPEN_QUESTIONS.md A13); the PM page
+states the rule next to the table.
 """
 
 from datetime import timedelta
@@ -17,11 +18,9 @@ from apps.accounts.roles import is_project_manager
 from apps.projects.models import (
     OPEN_ISSUE_STATUSES,
     OPEN_TASK_STATUSES,
-    HandoverStatus,
     Project,
     ProjectIssue,
     ProjectTask,
-    SalesHandover,
     TaskStatus,
 )
 from apps.projects.permissions import visible_projects
@@ -51,22 +50,32 @@ class PMDashboardView(PMRequiredMixin, TemplateView):
         overdue_tasks = overview.overdue_tasks(today)
         serious_issues = overview.serious_issues()
         milestones = overview.upcoming_milestones(today)
-        pending_handovers = SalesHandover.objects.filter(status__in=(HandoverStatus.PENDING, HandoverStatus.NEEDS_INFO))
+        week_ago = today - timedelta(days=6)  # the last 7 days, today included
+        done_7d = overview.completed_between(week_ago, today + timedelta(days=1))
+        done_prev_7d = overview.completed_between(week_ago - timedelta(days=7), week_ago)
+        summary = overview.health_summary(health)
 
         context.update(
             today=today,
+            generated_at=timezone.localtime(),
             kpis={
                 "active_projects": len(health),
                 "total_projects": Project.objects.count(),
                 "needs_attention": sum(row.needs_attention for row in health),
+                "red_projects": summary[0]["count"],
                 "overdue_tasks": overdue_tasks.count(),
                 "open_tasks": sum(row.open_tasks for row in health),
-                "pending_handovers": pending_handovers.count(),
-                "handovers_needing_info": pending_handovers.filter(status=HandoverStatus.NEEDS_INFO).count(),
+                "done_7d": done_7d,
+                "done_prev_7d": done_prev_7d,
+                "done_delta": abs(done_7d - done_prev_7d),
             },
+            health_summary=summary,
+            health_chart=overview.health_chart(summary),
             project_health=health,
-            task_mix_chart=overview.task_mix_by_project(),
-            due_load_chart=overview.open_tasks_by_due_window(today),
+            roadmap=overview.roadmap(health, today),
+            workload_chart=overview.workload_by_assignee(today),
+            throughput_chart=overview.weekly_throughput(today),
+            cross_department=overview.cross_department(),
             action_tasks=overdue_tasks.select_related("project", "assignee").order_by("due_date")[
                 : overview.MAX_ACTION_TASKS
             ],

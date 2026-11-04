@@ -47,15 +47,39 @@ class DashboardTests(TestCase):
         self.assertEqual(health[self.project].open_tasks, 1)
         self.assertEqual(health[self.project].reasons, ["1 việc quá hạn"])
 
-        mix = response.context["task_mix_chart"]
-        self.assertEqual(mix["labels"], sorted([self.project.code, self.hidden.code]))
-        done = next(d for d in mix["datasets"] if d["label"] == TaskStatus.DONE.label)
-        self.assertEqual(sum(done["data"]), 1)
+        # One overdue task each -> amber, not red.
+        self.assertEqual(health[self.project].health, "amber")
+        summary = {h["level"]: h["count"] for h in response.context["health_summary"]}
+        self.assertEqual(summary, {"red": 0, "amber": 2, "green": 0})
 
-        due = response.context["due_load_chart"]
-        counts = dict(zip(due["labels"], due["datasets"][0]["data"]))
-        self.assertEqual(counts["Quá hạn"], 2)
-        self.assertEqual(sum(counts.values()), 2)  # every open task lands in exactly one bucket
+        workload = response.context["workload_chart"]
+        self.assertEqual(set(workload["labels"]), {str(self.member), str(self.other)})
+        overdue = next(d for d in workload["datasets"] if d["label"] == "Quá hạn")
+        self.assertEqual(sum(overdue["data"]), 2)
+        total = sum(sum(d["data"]) for d in workload["datasets"])
+        self.assertEqual(total, 2)  # every open task lands in exactly one bucket
+
+        trend = response.context["throughput_chart"]
+        self.assertEqual(len(trend["labels"]), 8)
+        created = next(d for d in trend["datasets"] if d["label"] == "Việc mới")
+        self.assertEqual(created["data"][-1], 3)  # all three tasks were created this week
+
+        self.assertEqual(len(response.context["roadmap"]["rows"]), 2)
+
+    def test_health_turns_red_for_overdue_project_and_critical_issue(self):
+        from apps.projects.models import ProjectIssue, Severity
+
+        late = Project.objects.create(
+            name="Late", customer_name="C", manager=self.pm, planned_end_date=timezone.localdate() - timedelta(days=3)
+        )
+        ProjectIssue.objects.create(project=self.hidden, title="Critical", severity=Severity.CRITICAL, reported_by=self.pm)
+        self.login(self.pm)
+        health = {row.project: row for row in self.client.get(reverse("dashboard:pm")).context["project_health"]}
+        self.assertEqual(health[late].health, "red")
+        self.assertEqual(health[late].reasons, ["Quá ngày kết thúc"])
+        self.assertEqual(health[self.hidden].health, "red")
+        rows = self.client.get(reverse("dashboard:pm")).context["project_health"]
+        self.assertEqual(rows[-1].project, self.project)  # red projects sort first
 
     def test_critical_issues_are_listed_before_high(self):
         from apps.projects.models import ProjectIssue, Severity

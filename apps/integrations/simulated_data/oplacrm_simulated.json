@@ -1,26 +1,26 @@
 {
   "_comment": "DỮ LIỆU MÔ PHỎNG theo định dạng record nội bộ (apps/integrations/records.py). KHÔNG phải response thật của OplaCRM; tên công ty là hư cấu.",
   "accounts": [
-    {"external_id": "SIM-ACC-001", "name": "Công ty Mô Phỏng Hoà Bình (SIM)", "updated_at": "2026-10-01T09:00:00+07:00"},
-    {"external_id": "SIM-ACC-002", "name": "Công ty Mô Phỏng Sông Hồng (SIM)", "updated_at": "2026-10-05T10:30:00+07:00"},
-    {"external_id": "SIM-ACC-003", "name": "Công ty Mô Phỏng Bến Thành (SIM)", "updated_at": "2026-10-12T14:00:00+07:00"},
-    {"external_id": "SIM-ACC-004", "name": "Công ty Mô Phỏng Trường Sơn (SIM)", "updated_at": "2026-10-20T08:15:00+07:00"}
+    {"external_id": "ACC-0101", "name": "Công ty CP Xây lắp Điện Phú Thịnh", "updated_at": "2026-10-01T09:00:00+07:00"},
+    {"external_id": "ACC-0102", "name": "Công ty TNHH Giải pháp Văn phòng Sông Hồng", "updated_at": "2026-10-05T10:30:00+07:00"},
+    {"external_id": "ACC-0103", "name": "Công ty CP Chuỗi Bán lẻ Bến Nghé", "updated_at": "2026-10-12T14:00:00+07:00"},
+    {"external_id": "ACC-0104", "name": "Công ty TNHH Dịch vụ Dữ liệu Trường Sơn", "updated_at": "2026-10-20T08:15:00+07:00"}
   ],
   "opportunities": [
-    {"external_id": "SIM-OPP-101", "name": "Hệ thống báo cháy kho A (SIM)", "account_external_id": "SIM-ACC-001",
+    {"external_id": "OPP-2026-031", "name": "Hệ thống báo cháy tự động kho A", "account_external_id": "ACC-0101",
      "amount": "860000000", "currency": "VND", "stage_name": "Thắng", "is_won": true,
-     "expected_close_date": "2026-10-15", "owner_name": "Sales Mô Phỏng 1", "updated_at": "2026-10-16T09:00:00+07:00"},
-    {"external_id": "SIM-OPP-102", "name": "Mạng LAN văn phòng mới (SIM)", "account_external_id": "SIM-ACC-002",
+     "expected_close_date": "2026-10-15", "owner_name": "Phạm Minh Đức", "updated_at": "2026-10-16T09:00:00+07:00"},
+    {"external_id": "OPP-2026-032", "name": "Hạ tầng mạng LAN văn phòng mới", "account_external_id": "ACC-0102",
      "amount": "420000000", "currency": "VND", "stage_name": "Đàm phán", "is_won": false,
-     "expected_close_date": "2026-11-30", "owner_name": "Sales Mô Phỏng 2", "updated_at": "2026-10-18T11:00:00+07:00"},
-    {"external_id": "SIM-OPP-103", "name": "Camera giám sát chi nhánh (SIM)", "account_external_id": "SIM-ACC-003",
+     "expected_close_date": "2026-11-30", "owner_name": "Ngô Thanh Tâm", "updated_at": "2026-10-18T11:00:00+07:00"},
+    {"external_id": "OPP-2026-033", "name": "Camera giám sát hệ thống chi nhánh", "account_external_id": "ACC-0103",
      "amount": "615000000", "currency": "VND", "stage_name": "Thắng", "is_won": true,
-     "expected_close_date": "2026-10-25", "owner_name": "Sales Mô Phỏng 1", "updated_at": "2026-10-26T16:30:00+07:00"},
-    {"external_id": "SIM-OPP-104", "name": "Bảo trì máy chủ 12 tháng (SIM)", "account_external_id": "SIM-ACC-004",
+     "expected_close_date": "2026-10-25", "owner_name": "Phạm Minh Đức", "updated_at": "2026-10-26T16:30:00+07:00"},
+    {"external_id": "OPP-2026-034", "name": "Bảo trì máy chủ 12 tháng", "account_external_id": "ACC-0104",
      "amount": "150000000", "currency": "VND", "stage_name": "Báo giá", "is_won": false,
-     "expected_close_date": "2026-12-15", "owner_name": "Sales Mô Phỏng 2", "updated_at": "2026-10-28T09:45:00+07:00"},
-    {"external_id": "SIM-OPP-105", "name": "Tổng đài IP (SIM)", "account_external_id": "SIM-ACC-002",
+     "expected_close_date": "2026-12-15", "owner_name": "Ngô Thanh Tâm", "updated_at": "2026-10-28T09:45:00+07:00"},
+    {"external_id": "OPP-2026-035", "name": "Tổng đài IP nội bộ", "account_external_id": "ACC-0102",
      "amount": "98000000", "currency": "VND", "stage_name": "Thua", "is_won": false,
-     "expected_close_date": "2026-10-10", "owner_name": "Sales Mô Phỏng 1", "updated_at": "2026-10-11T10:00:00+07:00"}
+     "expected_close_date": "2026-10-10", "owner_name": "Phạm Minh Đức", "updated_at": "2026-10-11T10:00:00+07:00"}
   ]
 }

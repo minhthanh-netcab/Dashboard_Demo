@@ -63,11 +63,11 @@ Mở <http://localhost:8000>. Kiểm tra tình trạng: <http://localhost:8000/h
 
 | Tài khoản | Vai trò | Thấy gì |
 |---|---|---|
-| `pm.demo` | PROJECT_MANAGER | Tất cả dự án, dashboard, bàn giao, số tiền |
-| `member.an`, `member.binh` | PROJECT_MEMBER | Chỉ dự án mình tham gia; cập nhật task của mình; không thấy số tiền |
-| `finance.demo` | PROJECT_MEMBER + FINANCE_VIEWER | Như thành viên, nhưng thấy các trường tài chính |
-| `sales.demo` | SALES_VIEWER | Xem hồ sơ bàn giao và cơ hội OplaCRM (không thấy giá trị bán — xem OPEN_QUESTIONS) |
-| `admin.demo` | SYSTEM_ADMIN | Trang "Đồng bộ": chạy đồng bộ mô phỏng |
+| `ql.duan` (Lê Hoàng Nam) | PROJECT_MANAGER | Tất cả dự án, dashboard, bàn giao, số tiền |
+| `an.nguyen`, `binh.tran` | PROJECT_MEMBER | Chỉ dự án mình tham gia; cập nhật task của mình; không thấy số tiền |
+| `ketoan` (Võ Thu Hà) | PROJECT_MEMBER + FINANCE_VIEWER | Như thành viên, nhưng thấy các trường tài chính |
+| `kinhdoanh` (Phạm Minh Đức) | SALES_VIEWER | Xem hồ sơ bàn giao và cơ hội OplaCRM (không thấy giá trị bán — xem OPEN_QUESTIONS) |
+| `quantri` (Đỗ Quang Huy) | SYSTEM_ADMIN | Trang "Đồng bộ": chạy đồng bộ mô phỏng |
 
 ## Đồng bộ mô phỏng (Phase 2–3)
 
@@ -78,7 +78,7 @@ docker compose exec web python manage.py import_finance_csv docs/samples/finance
     --kind DEBT_BALANCE --as-of 2026-10-31 --period "Tháng 10/2026"
 ```
 
-Hoặc đăng nhập `admin.demo` → menu **Đồng bộ** → **Chạy đồng bộ**. Kết quả xem ở các menu **Cơ hội (OplaCRM)**, **Bàn giao từ Sales** và **Tài chính**.
+Hoặc đăng nhập `quantri` → menu **Đồng bộ** → **Chạy đồng bộ**. Kết quả xem ở các menu **Cơ hội (OplaCRM)**, **Bàn giao từ Sales** và **Tài chính**.
 
 Chế độ tích hợp đặt trong `.env`: `OPLACRM_MODE` / `MISA_MODE` = `mock` (mặc định) | `live` | `disabled`. Chế độ `live` hiện sẽ dừng với thông báo "chưa sẵn sàng" và không gọi mạng, cho tới khi adapter được hoàn thiện theo tài liệu chính thức.
 

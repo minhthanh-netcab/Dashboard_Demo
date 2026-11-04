@@ -24,7 +24,7 @@ class StatusEntryFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["status_source"].choices = [c for c in StatusSource.choices if c[0] != StatusSource.DEMO]
-        self.fields["status_label"].help_text = "Ví dụ: Đã gửi PM duyệt, Đã nhập MISA… (quy trình chưa chốt)."
+        self.fields["status_label"].help_text = "Ví dụ: Đã trình Quản lý dự án, Đã lập chứng từ trên MISA…"
 
 
 class PurchaseStatusEntryForm(StatusEntryFormMixin, ScopedModelForm):

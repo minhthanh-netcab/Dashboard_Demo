@@ -19,8 +19,8 @@ ALL_ROLES = (PROJECT_MANAGER, PROJECT_MEMBER, SALES_VIEWER, FINANCE_VIEWER, SYST
 ROLE_LABELS = {
     PROJECT_MANAGER: "Quản lý dự án",
     PROJECT_MEMBER: "Thành viên dự án",
-    SALES_VIEWER: "Xem dữ liệu Sales",
-    FINANCE_VIEWER: "Tài chính",
+    SALES_VIEWER: "Kinh doanh (chỉ xem)",
+    FINANCE_VIEWER: "Tài chính – Kế toán",
     SYSTEM_ADMIN: "Quản trị hệ thống",
 }
 

@@ -14,7 +14,7 @@ class SalesConfig(AppConfig):
         jobs.register(
             jobs.SyncJob(
                 key="oplacrm",
-                label="OplaCRM → Accounts, Opportunities",
+                label="OplaCRM → Khách hàng, Cơ hội bán hàng",
                 system=ExternalSystem.OPLACRM,
                 run=run_oplacrm_sync,
             )

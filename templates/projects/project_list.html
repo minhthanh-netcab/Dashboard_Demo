@@ -36,7 +36,7 @@
           <th scope="col">Trạng thái</th>
           <th scope="col">Quản lý</th>
           <th scope="col">Kết thúc</th>
-          <th scope="col" class="col-progress" title="% do người dùng tự báo cáo, không phải công thức">Tiến độ báo cáo</th>
+          <th scope="col" class="col-progress" title="Tỷ lệ % theo báo cáo gần nhất của người phụ trách">Tiến độ báo cáo</th>
         </tr>
       </thead>
       <tbody>
@@ -45,7 +45,7 @@
           <td><a class="code" href="{{ p.get_absolute_url }}">{{ p.code }}</a></td>
           <td>
             <a class="cell-title" href="{{ p.get_absolute_url }}">{{ p.name }}</a>
-            <span class="cell-sub">{{ p.customer_name }}{% if p.is_demo_data %} <span class="badge text-bg-light border">Mẫu</span>{% endif %}</span>
+            <span class="cell-sub">{{ p.customer_name }}</span>
           </td>
           <td><span class="badge text-bg-{{ p.status|badge }}">{{ p.get_status_display }}</span></td>
           <td class="text-nowrap">{{ p.manager }}</td>
